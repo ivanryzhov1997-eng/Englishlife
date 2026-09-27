@@ -2,6 +2,24 @@ const KEY="englishRPG_v2";
 const LEVELS=[["Tutorial Village",0,500],["English Survivor",500,1500],["Traveler",1500,3000],["Social Zone",3000,6000],["American Conversation",6000,10000],["English Main Character",10000,Infinity]];
 const QUESTS=[["Introduce Yourself","Расскажи о себе 60–90 секунд: откуда ты, чем занимаешься, что любишь и зачем учишь английский.",50,"speaking"],["Yesterday Quest","Расскажи 60 секунд о вчерашнем дне. Используй минимум 5 глаголов в Past Simple.",50,"grammar"],["USA Dream","Объясни 60 секунд, почему хочешь поехать в США и что хочешь там увидеть.",50,"speaking"],["Question Hunter","Придумай 5 вопросов человеку из США. Не копируй готовые вопросы.",50,"speaking"],["Daily Life","Опиши свою обычную неделю: учеба, работа, гитара, спорт, друзья.",50,"grammar"],["Story Mode","Расскажи маленькую историю из жизни с началом, событием и концом.",60,"speaking"]];
 const BASE={xp:0,stats:{speaking:1,listening:1,vocab:1,grammar:1},streak:0,lastDay:null,quest:0,doneDate:null,enemies:{want:{name:"Want Goblin",hits:0},past:{name:"Past Tense Goblin",hits:0},be:{name:"Be Monster",hits:0},prep:{name:"Preposition Slime",hits:0},questions:{name:"Question Hydra",hits:0}},loot:[{phrase:"I want to + verb",uses:0},{phrase:"I'm trying to + verb",uses:0},{phrase:"I'm going to + verb",uses:0}],settings:{endpoint:"https://api.openai.com/v1/chat/completions",model:"gpt-5-mini",key:""}};
+
+function forceCloseSettings() {
+  const selectors = [
+    '#settingsModal', '#settings-modal', '.settings-modal',
+    '[data-modal="settings"]', '.modal.settings', '.modal.active'
+  ];
+  selectors.forEach(sel => {
+    document.querySelectorAll(sel).forEach(el => {
+      el.classList.remove('open', 'active', 'show');
+      el.setAttribute('aria-hidden', 'true');
+      el.style.display = 'none';
+    });
+  });
+  // Close via the existing modal mechanism too, if present.
+  document.body.classList.remove('modal-open');
+  document.documentElement.classList.remove('modal-open');
+}
+
 function merge(a,b){for(const k in b){if(b[k]&&typeof b[k]=="object"&&!Array.isArray(b[k]))a[k]=merge(a[k]||{},b[k]);else a[k]=b[k]}return a}
 function load(){try{return merge(structuredClone(BASE),JSON.parse(localStorage.getItem(KEY)||"{}"))}catch{return structuredClone(BASE)}}let s=load(),$=id=>document.getElementById(id);
 function save(){localStorage.setItem(KEY,JSON.stringify(s))}function today(){return new Date().toISOString().slice(0,10)}
@@ -23,3 +41,7 @@ $("finishQuest").onclick=()=>{markDay();if(s.doneDate===today()){toast("Квес
 $("checkQuest").onclick=async()=>{let v=$("answerBox").value.trim();if(!v){toast("Напиши ответ");return}$("checkQuest").disabled=true;$("checkQuest").textContent="🤖 Проверяю...";let out=await askAI(v,true);$("checkQuest").disabled=false;$("checkQuest").textContent="🤖 Проверить с ИИ";if(out){$("questFeedback").textContent=out;$("questFeedback").classList.remove("hidden");markDay();if(s.doneDate!==today()){let q=QUESTS[s.quest%QUESTS.length];s.doneDate=today();s.quest++;gain(q[2],q[3])}}};
 async function send(){let v=$("chatInput").value.trim();if(!v)return;$("chatInput").value="";addChat(v,"user");addChat("Thinking...","ai");let out=await askAI(v);$("chat").lastElementChild.remove();addChat(out||"No response.","ai");if(out)gain(10,"speaking")}
 $("sendChat").onclick=send;$("chatInput").onkeydown=e=>{if(e.key==="Enter")send()};render();
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('#saveSettings, [data-action="save-settings"], .save-settings');
+  if (btn) setTimeout(forceCloseSettings, 0);
+});
