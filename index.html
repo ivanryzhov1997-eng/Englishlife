@@ -1,105 +1,17 @@
-<!doctype html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#0b1020">
-  <title>English RPG — Level Up Your English</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-<div id="app">
-  <header class="topbar">
-    <div>
-      <div class="eyebrow">ENGLISH RPG</div>
-      <h1>Level Up Your English</h1>
-    </div>
-    <button id="settingsBtn" class="icon-btn" aria-label="Настройки">⚙️</button>
-  </header>
-
-  <main>
-    <section class="hero card">
-      <div class="level-row">
-        <div class="level-badge" id="levelBadge">1</div>
-        <div class="level-copy">
-          <div class="muted">Уровень</div>
-          <strong id="levelName">Tutorial Village</strong>
-        </div>
-        <div class="xp-total"><b id="xpTotal">0</b> XP</div>
-      </div>
-      <div class="xp-track"><div id="xpBar" class="xp-fill"></div></div>
-      <div class="xp-caption"><span id="xpNow">0</span> / <span id="xpNext">500</span> XP</div>
-    </section>
-
-    <section class="stats-grid">
-      <div class="stat card"><span>🗣️</span><b id="speaking">1</b><small>Speaking</small></div>
-      <div class="stat card"><span>👂</span><b id="listening">1</b><small>Listening</small></div>
-      <div class="stat card"><span>📚</span><b id="vocab">1</b><small>Vocabulary</small></div>
-      <div class="stat card"><span>⚔️</span><b id="grammar">1</b><small>Grammar</small></div>
-    </section>
-
-    <section class="card quest">
-      <div class="section-title"><span>🎯 Главный квест</span><span class="pill" id="questXp">+50 XP</span></div>
-      <h2 id="questTitle">Introduce Yourself</h2>
-      <p id="questText">Расскажи о себе на английском 60–90 секунд. Не переводи каждое слово.</p>
-      <textarea id="answerBox" placeholder="Write or speak your answer here..."></textarea>
-      <div class="actions">
-        <button id="checkQuest" class="primary">⚔️ Проверить с ИИ</button>
-        <button id="finishQuest" class="secondary">✓ Выполнить без ИИ</button>
-      </div>
-      <div id="questFeedback" class="feedback hidden"></div>
-    </section>
-
-    <section class="card">
-      <div class="section-title"><span>🤖 AI Tutor</span><span class="pill">Ваш GM</span></div>
-      <div id="chat" class="chat">
-        <div class="bubble ai">Привет! Я твой Game Master. Пиши мне по-английски, а я буду исправлять только самое важное и давать следующий мини-квест.</div>
-      </div>
-      <div class="chat-row">
-        <input id="chatInput" placeholder="Ask your English GM...">
-        <button id="sendChat" class="primary small">Send</button>
-      </div>
-    </section>
-
-    <section class="card">
-      <div class="section-title"><span>👾 Твои враги</span><span class="muted">Ошибки → навыки</span></div>
-      <div id="enemies" class="enemy-list"></div>
-    </section>
-
-    <section class="card">
-      <div class="section-title"><span>💎 Loot</span><span class="muted">Фразы, которые ты украл у английского</span></div>
-      <div id="loot" class="loot-list"></div>
-    </section>
-
-    <section class="card">
-      <div class="section-title"><span>🔥 Streak</span></div>
-      <div class="streak-row">
-        <div class="streak-number" id="streak">0</div>
-        <div><b>дней подряд</b><p class="muted">Минимум дня: 10 XP. Главное — не обнулить цепочку.</p></div>
-      </div>
-    </section>
-
-    <section class="card">
-      <div class="section-title"><span>🗺️ Карта мира</span></div>
-      <div id="map" class="map"></div>
-    </section>
-  </main>
-
-  <div id="settingsModal" class="modal hidden">
-    <div class="modal-card">
-      <div class="section-title"><span>⚙️ AI настройки</span><button id="closeSettings" class="icon-btn">✕</button></div>
-      <p class="muted">Для GitHub Pages ключ хранится только в браузере. Это удобно для личного приложения, но не подходит для публичного коммерческого приложения. Для безопасного варианта используй серверный proxy.</p>
-      <label>API endpoint<input id="apiEndpoint" value="https://api.openai.com/v1/chat/completions"></label>
-      <label>Model<input id="apiModel" value="gpt-5-mini"></label>
-      <label>API key<input id="apiKey" type="password" placeholder="sk-..."></label>
-      <button id="saveSettings" class="primary full">Сохранить</button>
-      <hr>
-      <button id="resetApp" class="danger full">Сбросить прогресс</button>
-    </div>
-  </div>
-
-  <div id="toast" class="toast hidden"></div>
-</div>
-<script src="app.js"></script>
-</body>
-</html>
+<!doctype html><html lang="ru"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080c18"><title>English RPG</title><link rel="stylesheet" href="style.css">
+</head><body><div id="app"><header><div><div class="eyebrow">ENGLISH RPG</div><h1>Level Up Your English</h1></div><button id="settingsBtn" class="icon">⚙️</button></header><main>
+<section class="card hero"><div class="level"><div id="levelBadge" class="badge">1</div><div class="grow"><small>Уровень</small><b id="levelName"></b></div><b><span id="xpTotal">0</span> XP</b></div><div class="track"><div id="xpBar"></div></div><small id="xpCaption"></small></section>
+<section class="stats"><div class="card stat">🗣️<b id="speaking">1</b><small>Speaking</small></div><div class="card stat">👂<b id="listening">1</b><small>Listening</small></div><div class="card stat">📚<b id="vocab">1</b><small>Vocabulary</small></div><div class="card stat">⚔️<b id="grammar">1</b><small>Grammar</small></div></section>
+<section class="card"><div class="title"><b>🎯 Главный квест</b><span id="questXp" class="pill"></span></div><h2 id="questTitle"></h2><p id="questText"></p><textarea id="answerBox" placeholder="Напиши ответ на английском..."></textarea><div class="buttons"><button id="checkQuest" class="primary">🤖 Проверить с ИИ</button><button id="finishQuest" class="secondary">✓ Выполнить</button></div><div id="questFeedback" class="feedback hidden"></div></section>
+<section class="card"><div class="title"><b>🤖 AI Game Master</b><span class="pill">GM</span></div><div id="chat" class="chat"><div class="bubble ai">Hey! I'm your English Game Master. Talk to me in English.</div></div><div class="chatrow"><input id="chatInput" placeholder="Talk to your GM..."><button id="sendChat" class="primary">Send</button></div></section>
+<section class="card"><div class="title"><b>👾 Враги</b><small>Твои повторяющиеся ошибки</small></div><div id="enemies" class="chips"></div></section>
+<section class="card"><div class="title"><b>💎 Loot</b><small>Фразы</small></div><div id="loot" class="chips"></div></section>
+<section class="card"><div class="title"><b>🔥 Streak</b></div><div class="streak"><strong id="streak">0</strong><span>дней<br><small>Минимум дня: 10 XP</small></span></div></section>
+<section class="card"><div class="title"><b>🗺️ Карта</b></div><div id="map" class="map"></div></section></main></div>
+<div id="settingsModal" class="modal hidden"><div class="modalbox"><div class="title"><b>⚙️ AI настройки</b><button id="closeSettings" class="icon">✕</button></div>
+<p class="note">Ключ сохраняется только в этом браузере. Не публикуй его в GitHub. Для личного тестирования подходит.</p>
+<label>API endpoint<input id="apiEndpoint"></label><label>Model<input id="apiModel"></label><label>API key<input id="apiKey" type="password" autocomplete="off" placeholder="sk-..."></label>
+<div class="buttons"><button id="saveSettings" class="primary">Сохранить</button><button id="cancelSettings" class="secondary">Отмена</button></div><button id="clearKey" class="danger">Удалить API key</button><hr><button id="resetApp" class="danger">Сбросить весь прогресс</button></div></div>
+<div id="toast" class="toast hidden"></div><script src="app.js"></script></body></html>
