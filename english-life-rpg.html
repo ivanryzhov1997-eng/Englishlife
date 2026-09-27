@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#12141a">
+  <meta name="description" content="ENGLISH LIFE RPG — выучи английский как игру: 30–60 минут в день, квесты, ИИ-тьютор.">
+  <title>ENGLISH LIFE RPG</title>
+  <style>
+    :root {
+      --bg: #12141a;
+      --bg2: #181b24;
+      --panel: #1c2030;
+      --panel-hover: #242a3c;
+      --border: rgba(180, 200, 255, 0.08);
+      --border-light: rgba(180, 200, 255, 0.14);
+      --accent: #7eb6ff;
+      --gold: #e0b878;
+      --green: #6bcf8e;
+      --red: #e07a7a;
+      --text: #eef2ff;
+      --text-dim: #a8b0c8;
+      --text-muted: #6b7390;
+      --radius: 16px;
+      --radius-sm: 12px;
+      --nav-h: 58px;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+      height: 100%; height: 100dvh; overflow: hidden;
+      font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg); color: var(--text);
+      line-height: 1.5; -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      display: flex; flex-direction: column;
+      padding-top: var(--safe-top);
+      background:
+        radial-gradient(ellipse 100% 60% at 50% -10%, rgba(126, 182, 255, 0.12), transparent 50%),
+        var(--bg);
+    }
+
+    .nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      height: calc(var(--nav-h) + var(--safe-bottom));
+      padding-bottom: var(--safe-bottom);
+      background: rgba(18, 20, 26, 0.92);
+      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border);
+      display: flex; z-index: 1000;
+    }
+
+    .nav-btn {
+      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 3px; background: none; border: none; color: var(--text-muted);
+      font-size: 10px; font-weight: 500; cursor: pointer; min-height: 44px;
+      font-family: inherit; transition: color 0.2s var(--ease);
+    }
+    .nav-btn .ico { font-size: 18px; line-height: 1; opacity: 0.55; }
+    .nav-btn.active { color: var(--accent); }
+    .nav-btn.active .ico { opacity: 1; }
+
+    .screens {
+      flex: 1; overflow: hidden; min-height: 0;
+      padding-bottom: calc(var(--nav-h) + var(--safe-bottom));
+    }
+
+    .screen {
+      display: none; height: 100%; overflow-y: auto; overflow-x: hidden;
+      -webkit-overflow-scrolling: touch; padding: 14px 16px 24px;
+    }
+    .screen.active { display: block; animation: fadeIn 0.22s ease; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .header { margin-bottom: 18px; }
+    .header h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.4px; }
+    .header p { color: var(--text-muted); font-size: 0.84rem; margin-top: 3px; }
+
+    .card {
+      background: var(--panel); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px; margin-bottom: 12px;
+    }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 12px 16px; border-radius: var(--radius-sm); border: none;
+      font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: inherit;
+      min-height: 44px; transition: transform 0.15s, opacity 0.15s;
+    }
+    .btn:active { transform: scale(0.97); opacity: 0.9; }
+    .btn-primary {
+      background: linear-gradient(180deg, #9ec8ff 0%, #7eb6ff 100%);
+      color: #0c1220;
+    }
+    .btn-secondary {
+      background: rgba(180, 200, 255, 0.06); color: var(--text);
+      border: 1px solid var(--border-light);
+    }
+    .btn-success {
+      background: rgba(107, 207, 142, 0.15); color: var(--green);
+      border: 1px solid rgba(107, 207, 142, 0.3);
+    }
+    .btn-sm { padding: 8px 12px; font-size: 0.8rem; min-height: 36px; }
+    .btn-block { width: 100%; }
+
+    .progress-wrap {
+      height: 6px; background: rgba(180, 200, 255, 0.08);
+      border-radius: 99px; overflow: hidden; margin: 10px 0;
+    }
+    .progress-bar {
+      height: 100%; border-radius: 99px;
+      background: linear-gradient(90deg, #5a9eef, #7eb6ff);
+      transition: width 0.4s var(--ease);
+    }
+    .progress-bar.gold { background: linear-gradient(90deg, #c49a5c, #e0b878); }
+    .progress-bar.green { background: linear-gradient(90deg, #4aaf72, #6bcf8e); }
+
+    .badge {
+      display: inline-flex; padding: 3px 9px; border-radius: 99px;
+      font-size: 0.68rem; font-weight: 650; letter-spacing: 0.3px;
+      text-transform: uppercase; background: rgba(126, 182, 255, 0.12); color: var(--accent);
+    }
+    .badge-gold { background: rgba(224, 184, 120, 0.15); color: var(--gold); }
+    .badge-green { background: rgba(107, 207, 142, 0.15); color: var(--green); }
+
+    .hero-card {
+      background: linear-gradient(165deg, rgba(126, 182, 255, 0.1) 0%, var(--panel) 45%);
+      border: 1px solid var(--border); border-radius: calc(var(--radius) + 2px);
+      padding: 20px; margin-bottom: 14px;
+    }
+    .hero-name { font-size: 1.05rem; font-weight: 600; }
+    .hero-lvl {
+      font-size: 2.4rem; font-weight: 750; letter-spacing: -1.5px;
+      line-height: 1.1; margin: 8px 0 4px;
+    }
+    .stats-row {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 12px;
+    }
+    .stat-mini {
+      background: rgba(180, 200, 255, 0.04); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 12px 10px; text-align: center;
+    }
+    .stat-mini .v { font-size: 1.2rem; font-weight: 700; }
+    .stat-mini .l { font-size: 0.68rem; color: var(--text-muted); margin-top: 2px; }
+
+    .quest-card { position: relative; }
+    .quest-card.done { opacity: 0.55; }
+    .quest-card.done .q-title { text-decoration: line-through; color: var(--text-dim); }
+    .q-title { font-size: 1rem; font-weight: 650; margin-bottom: 6px; }
+    .q-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+    .q-desc { font-size: 0.86rem; color: var(--text-dim); margin-bottom: 12px; line-height: 1.5; }
+    .q-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .skill-row {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+    }
+    .skill-row:last-child { margin-bottom: 0; }
+    .skill-ico {
+      width: 40px; height: 40px; border-radius: 12px;
+      background: rgba(126, 182, 255, 0.1); display: flex; align-items: center;
+      justify-content: center; font-size: 1.1rem; flex-shrink: 0;
+    }
+    .skill-info { flex: 1; min-width: 0; }
+    .skill-name { font-weight: 600; font-size: 0.92rem; }
+    .skill-lvl { font-size: 0.75rem; color: var(--text-muted); }
+
+    .chat-box {
+      display: flex; flex-direction: column; height: calc(100dvh - var(--nav-h) - var(--safe-bottom) - var(--safe-top) - 120px);
+      min-height: 320px;
+    }
+    .chat-messages {
+      flex: 1; overflow-y: auto; padding: 8px 0 12px;
+      display: flex; flex-direction: column; gap: 10px;
+    }
+    .msg {
+      max-width: 88%; padding: 12px 14px; border-radius: 14px;
+      font-size: 0.9rem; line-height: 1.45; white-space: pre-wrap; word-break: break-word;
+    }
+    .msg.user {
+      align-self: flex-end; background: rgba(126, 182, 255, 0.18);
+      border: 1px solid rgba(126, 182, 255, 0.25);
+    }
+    .msg.bot {
+      align-self: flex-start; background: var(--panel);
+      border: 1px solid var(--border);
+    }
+    .msg.sys {
+      align-self: center; background: transparent; color: var(--text-muted);
+      font-size: 0.8rem; text-align: center; max-width: 100%;
+    }
+    .chat-input-row {
+      display: flex; gap: 8px; padding-top: 8px; border-top: 1px solid var(--border);
+    }
+    .chat-input-row textarea {
+      flex: 1; min-height: 44px; max-height: 120px; resize: none;
+      padding: 12px; background: rgba(180, 200, 255, 0.05);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      color: var(--text); font-family: inherit; font-size: 0.95rem; outline: none;
+    }
+    .chat-input-row textarea:focus { border-color: rgba(126, 182, 255, 0.4); }
+
+    .mode-chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; }
+    .chip {
+      flex-shrink: 0; padding: 8px 14px; border-radius: 99px;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--text-muted); font-size: 0.8rem; font-weight: 550;
+      cursor: pointer; font-family: inherit;
+    }
+    .chip.active {
+      background: rgba(126, 182, 255, 0.15);
+      border-color: rgba(126, 182, 255, 0.35); color: var(--accent);
+    }
+
+    .form-group { margin-bottom: 14px; }
+    .form-group label {
+      display: block; font-size: 0.75rem; font-weight: 650;
+      color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 12px; background: rgba(180, 200, 255, 0.05);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      color: var(--text); font-size: 0.95rem; font-family: inherit; outline: none;
+      min-height: 44px;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      border-color: rgba(126, 182, 255, 0.4);
+    }
+
+    .toast-container {
+      position: fixed; top: calc(12px + var(--safe-top)); left: 50%;
+      transform: translateX(-50%); z-index: 3000; width: min(340px, calc(100% - 32px));
+      pointer-events: none;
+    }
+    .toast {
+      background: rgba(28, 32, 48, 0.96); border: 1px solid var(--border-light);
+      border-radius: 14px; padding: 12px 16px; text-align: center;
+      font-size: 0.88rem; font-weight: 550; margin-bottom: 8px;
+      animation: fadeIn 0.25s ease;
+    }
+    .toast.ok { border-color: rgba(107, 207, 142, 0.4); }
+    .toast.err { border-color: rgba(224, 122, 122, 0.4); }
+
+    .empty {
+      text-align: center; padding: 36px 16px; color: var(--text-dim);
+    }
+    .empty h3 { color: var(--text); margin-bottom: 8px; font-size: 1.05rem; }
+    .empty p { font-size: 0.88rem; max-width: 280px; margin: 0 auto 16px; color: var(--text-muted); }
+
+    .mins { color: var(--gold); font-weight: 650; }
+    .flex-between { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  </style>
+</head>
+<body>
+  <div class="toast-container" id="toasts"></div>
+
+  <div class="screens">
+    <!-- TODAY -->
+    <div class="screen active" id="screen-today">
+      <div class="header">
+        <h1>ENGLISH LIFE RPG</h1>
+        <p>30–60 минут · реальный прогресс</p>
+      </div>
+      <div id="todayContent"></div>
+    </div>
+
+    <!-- PRACTICE / AI -->
+    <div class="screen" id="screen-practice">
+      <div class="header">
+        <h1>ИИ-тьютор</h1>
+        <p>Практика с обратной связью</p>
+      </div>
+      <div class="mode-chips" id="tutorModes">
+        <button class="chip active" data-mode="chat">Диалог</button>
+        <button class="chip" data-mode="correct">Исправь текст</button>
+        <button class="chip" data-mode="vocab">Слова</button>
+        <button class="chip" data-mode="role">Ролевая</button>
+      </div>
+      <div class="chat-box">
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input-row">
+          <textarea id="chatInput" rows="1" placeholder="Write in English…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat();}"></textarea>
+          <button class="btn btn-primary btn-sm" onclick="sendChat()" id="sendBtn">→</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SKILLS -->
+    <div class="screen" id="screen-skills">
+      <div class="header">
+        <h1>Навыки</h1>
+        <p>Шесть направлений английского</p>
+      </div>
+      <div id="skillsContent"></div>
+    </div>
+
+    <!-- LOG -->
+    <div class="screen" id="screen-log">
+      <div class="header flex-between">
+        <div>
+          <h1>Журнал</h1>
+          <p>Что сделал и чему научился</p>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="addLogManual()">+</button>
+      </div>
+      <div id="logContent"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="screen" id="screen-settings">
+      <div class="header">
+        <h1>Настройки</h1>
+        <p>Уровень, время, ИИ</p>
+      </div>
+      <div class="card">
+        <div class="form-group">
+          <label>Имя</label>
+          <input type="text" id="setName" maxlength="32" placeholder="Hero name">
+        </div>
+        <div class="form-group">
+          <label>Твой CEFR (сейчас)</label>
+          <select id="setCefr">
+            <option value="A1">A1 — Beginner</option>
+            <option value="A2">A2 — Elementary</option>
+            <option value="B1">B1 — Intermediate</option>
+            <option value="B2">B2 — Upper-Intermediate</option>
+            <option value="C1">C1 — Advanced</option>
+            <option value="C2">C2 — Mastery</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Минут в день</label>
+          <select id="setMinutes">
+            <option value="30">30 минут</option>
+            <option value="45">45 минут</option>
+            <option value="60">60 минут</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Цель (зачем английский)</label>
+          <input type="text" id="setGoal" maxlength="120" placeholder="Travel, work, exams…">
+        </div>
+        <button class="btn btn-primary btn-block" onclick="saveProfile()">Сохранить профиль</button>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size:0.95rem;margin-bottom:10px">ИИ (OpenAI-compatible)</h3>
+        <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:12px;line-height:1.45">
+          Подходит ChatGPT API, Groq, OpenRouter и любой proxy с форматом chat/completions.
+          Ключ хранится только на этом устройстве.
+        </p>
+        <div class="form-group">
+          <label>API Base URL</label>
+          <input type="url" id="setApiBase" placeholder="https://api.openai.com/v1">
+        </div>
+        <div class="form-group">
+          <label>API Key</label>
+          <input type="password" id="setApiKey" placeholder="sk-… или gsk-…" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>Модель</label>
+          <input type="text" id="setModel" placeholder="gpt-4o-mini">
+        </div>
+        <button class="btn btn-primary btn-block" onclick="saveAi()" style="margin-bottom:8px">Сохранить ИИ</button>
+        <button class="btn btn-secondary btn-block" onclick="testAi()">Проверить связь</button>
+        <p id="aiStatus" style="font-size:0.8rem;color:var(--text-muted);margin-top:10px"></p>
+      </div>
+
+      <div class="card">
+        <button class="btn btn-secondary btn-block" onclick="exportData()" style="margin-bottom:8px">Экспорт сейва</button>
+        <button class="btn btn-secondary btn-block" onclick="if(confirm('Сбросить весь прогресс?'))resetAll()">Сброс</button>
+      </div>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <button class="nav-btn active" data-screen="today"><span class="ico">☀</span><span>Сегодня</span></button>
+    <button class="nav-btn" data-screen="practice"><span class="ico">💬</span><span>Тьютор</span></button>
+    <button class="nav-btn" data-screen="skills"><span class="ico">◆</span><span>Навыки</span></button>
+    <button class="nav-btn" data-screen="log"><span class="ico">✎</span><span>Журнал</span></button>
+    <button class="nav-btn" data-screen="settings"><span class="ico">⚙</span><span>Ещё</span></button>
+  </nav>
+
+  <script>
+  (function () {
+    const STORAGE = 'english_life_rpg_v1';
+    const SECRET = 'english_life_rpg_key';
+
+    const SKILLS = [
+      { id: 'listening', name: 'Listening', ico: '🎧', tip: 'Подкасты, видео, диктанты' },
+      { id: 'speaking', name: 'Speaking', ico: '🗣', tip: 'Диалоги, shadowing, монологи' },
+      { id: 'reading', name: 'Reading', ico: '📖', tip: 'Статьи, stories, новости' },
+      { id: 'writing', name: 'Writing', ico: '✍️', tip: 'Сообщения, эссе, дневник' },
+      { id: 'vocab', name: 'Vocabulary', ico: '🔤', tip: 'Слова в контексте' },
+      { id: 'grammar', name: 'Grammar', ico: '📐', tip: 'Структуры и точность' }
+    ];
+
+    const CEFR_ORDER = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+
+    const DEFAULT_DAY = {
+      A1: [
+        { skill: 'vocab', title: 'Core words (10)', mins: 10, desc: 'Выучи 10 новых слов по теме дня. Запиши пример на каждое.' },
+        { skill: 'listening', title: 'Easy audio', mins: 10, desc: 'Слушай 1 короткий диалог (A1). Повтори вслух 3 фразы.' },
+        { skill: 'speaking', title: 'Self-intro drill', mins: 10, desc: 'Расскажи о себе 60 секунд на английском. Запиши голосом, если можешь.' }
+      ],
+      A2: [
+        { skill: 'vocab', title: 'Topic pack', mins: 10, desc: '10–12 слов по одной теме (еда / город / работа). 1 предложение на слово.' },
+        { skill: 'reading', title: 'Short text', mins: 15, desc: 'Прочитай короткий текст A2. Выпиши 5 незнакомых слов.' },
+        { skill: 'speaking', title: 'Describe your day', mins: 10, desc: 'Опиши свой день в 8–10 предложениях вслух.' },
+        { skill: 'grammar', title: 'Past Simple focus', mins: 10, desc: 'Сделай 8 предложений о вчерашнем дне в Past Simple.' }
+      ],
+      B1: [
+        { skill: 'listening', title: 'Podcast chunk', mins: 15, desc: '15 мин подкаста B1. Законспектируй 3 главные идеи.' },
+        { skill: 'vocab', title: 'Collocations', mins: 10, desc: '8 словосочетаний (make a decision, take a risk…). Примеры свои.' },
+        { skill: 'writing', title: 'Mini email', mins: 15, desc: 'Напиши email 80–120 слов на рабочую/учебную тему.' },
+        { skill: 'speaking', title: 'Opinion 2 min', mins: 10, desc: '2 минуты: мнение по любой новости. Без длинных пауз.' }
+      ],
+      B2: [
+        { skill: 'reading', title: 'Article deep-read', mins: 15, desc: 'Статья B2. 5 новых выражений + 3-sentence summary.' },
+        { skill: 'listening', title: 'Native speed', mins: 15, desc: 'Видео/подкаст ближе к native. Без субтитров 1-й раз, потом с.' },
+        { skill: 'writing', title: 'Argument paragraph', mins: 15, desc: 'Абзац 120–150 слов: claim → reason → example.' },
+        { skill: 'speaking', title: 'Role debate', mins: 10, desc: 'С ИИ-тьютором: спор на 1 тему, держи позицию 8–10 реплик.' }
+      ],
+      C1: [
+        { skill: 'listening', title: 'Lecture / interview', mins: 20, desc: '20 мин сложного аудирования. Notes + 5 advanced phrases.' },
+        { skill: 'writing', title: 'Structured response', mins: 20, desc: 'Письменный ответ 180–220 слов с linking devices.' },
+        { skill: 'speaking', title: 'Fluent monologue', mins: 15, desc: '3–4 минуты связной речи. Фокус: discourse markers.' },
+        { skill: 'grammar', title: 'Precision polish', mins: 10, desc: 'Возьми свой старый текст — улучши точность и стиль.' }
+      ],
+      C2: [
+        { skill: 'reading', title: 'Dense text', mins: 20, desc: 'Сложный текст (essay/analysis). Парафраз 1 абзаца.' },
+        { skill: 'writing', title: 'Style transfer', mins: 20, desc: 'Перепиши нейтральный текст в formal / persuasive tone.' },
+        { skill: 'speaking', title: 'Nuance talk', mins: 15, desc: 'Обсуди сложную тему с нюансами и оговорками (hedging).' }
+      ]
+    };
+
+    let state = null;
+    let tutorMode = 'chat';
+    let chatBusy = false;
+
+    function uid() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    }
+
+    function todayKey() {
+      const d = new Date();
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+
+    function defaultState() {
+      return {
+        name: 'Learner',
+        cefr: 'A2',
+        minutesTarget: 30,
+        goal: '',
+        xp: 0,
+        streak: 0,
+        lastActiveDay: null,
+        skills: Object.fromEntries(SKILLS.map(s => [s.id, { xp: 0, level: 1 }])),
+        dayPlan: [],
+        dayKey: null,
+        log: [],
+        chat: [],
+        ai: { base: 'https://api.openai.com/v1', model: 'gpt-4o-mini' }
+      };
+    }
+
+    function load() {
+      try {
+        const raw = localStorage.getItem(STORAGE);
+        if (raw) {
+          state = Object.assign(defaultState(), JSON.parse(raw));
+          if (!state.skills) state.skills = defaultState().skills;
+          if (!state.ai) state.ai = defaultState().ai;
+        } else state = defaultState();
+      } catch (e) {
+        state = defaultState();
+      }
+      ensureDayPlan();
+      updateStreakOnLoad();
+    }
+
+    function save() {
+      try {
+        localStorage.setItem(STORAGE, JSON.stringify(state));
+      } catch (e) {}
+    }
+
+    function getApiKey() {
+      try { return localStorage.getItem(SECRET) || ''; } catch (e) { return ''; }
+    }
+    function setApiKey(k) {
+      try {
+        if (k) localStorage.setItem(SECRET, k);
+        else localStorage.removeItem(SECRET);
+      } catch (e) {}
+    }
+
+    function hasAi() {
+      return !!(getApiKey() && state.ai && state.ai.base);
+    }
+
+    function toast(msg, type) {
+      const el = document.createElement('div');
+      el.className = 'toast ' + (type === 'ok' ? 'ok' : type === 'err' ? 'err' : '');
+      el.textContent = msg;
+      document.getElementById('toasts').appendChild(el);
+      setTimeout(() => el.remove(), 3200);
+    }
+
+    function levelFromXp(xp) {
+      return Math.min(99, 1 + Math.floor(Math.sqrt(xp / 40)));
+    }
+
+    function xpInLevel(xp) {
+      const lvl = levelFromXp(xp);
+      const prev = Math.pow(lvl - 1, 2) * 40;
+      const next = Math.pow(lvl, 2) * 40;
+      return { level: lvl, current: xp - prev, needed: next - prev, percent: Math.min(100, ((xp - prev) / (next - prev)) * 100) };
+    }
+
+    function updateStreakOnLoad() {
+      const t = todayKey();
+      if (!state.lastActiveDay) return;
+      const last = new Date(state.lastActiveDay + 'T12:00:00');
+      const now = new Date(t + 'T12:00:00');
+      const diff = Math.round((now - last) / 86400000);
+      if (diff > 1) state.streak = 0;
+    }
+
+    function markActiveToday() {
+      const t = todayKey();
+      if (state.lastActiveDay !== t) {
+        if (state.lastActiveDay) {
+          const last = new Date(state.lastActiveDay + 'T12:00:00');
+          const now = new Date(t + 'T12:00:00');
+          const diff = Math.round((now - last) / 86400000);
+          state.streak = diff === 1 ? (state.streak || 0) + 1 : 1;
+        } else state.streak = 1;
+        state.lastActiveDay = t;
+      }
+    }
+
+    function ensureDayPlan() {
+      const t = todayKey();
+      if (state.dayKey === t && state.dayPlan && state.dayPlan.length) return;
+      const pack = DEFAULT_DAY[state.cefr] || DEFAULT_DAY.A2;
+      let mins = 0;
+      const target = state.minutesTarget || 30;
+      const plan = [];
+      for (const q of pack) {
+        if (mins >= target && plan.length >= 2) break;
+        plan.push({
+          id: uid(),
+          title: q.title,
+          skill: q.skill,
+          mins: q.mins,
+          desc: q.desc,
+          done: false,
+          xp: Math.round(q.mins * 3.5)
+        });
+        mins += q.mins;
+      }
+      state.dayPlan = plan;
+      state.dayKey = t;
+      save();
+    }
+
+    function regenerateDay() {
+      state.dayKey = null;
+      ensureDayPlan();
+      renderToday();
+      toast('План на сегодня обновлён', 'ok');
+    }
+
+    async function aiDayPlan() {
+      if (!hasAi()) {
+        toast('Сначала настрой ИИ в Ещё', 'err');
+        switchScreen('settings');
+        return;
+      }
+      toast('Собираю план…');
+      try {
+        const system = `You are an expert English coach. Build a realistic daily study plan for CEFR ${state.cefr}, goal: "${state.goal || 'general English'}", total about ${state.minutesTarget} minutes. Reply ONLY valid JSON array of 3-5 objects: [{"title":"...","skill":"listening|speaking|reading|writing|vocab|grammar","mins":10,"desc":"clear task in Russian, practice in English","xp":35}]. Tasks must be concrete and doable today.`;
+        const user = 'Generate today plan.';
+        const raw = await callAi(system, user);
+        const arr = parseJsonArray(raw);
+        if (!arr || !arr.length) throw new Error('Пустой ответ ИИ');
+        state.dayPlan = arr.slice(0, 6).map(q => ({
+          id: uid(),
+          title: String(q.title || 'Task').slice(0, 80),
+          skill: SKILLS.some(s => s.id === q.skill) ? q.skill : 'vocab',
+          mins: Math.min(40, Math.max(5, parseInt(q.mins, 10) || 10)),
+          desc: String(q.desc || '').slice(0, 400),
+          done: false,
+          xp: Math.min(200, Math.max(15, parseInt(q.xp, 10) || 30))
+        }));
+        state.dayKey = todayKey();
+        save();
+        renderToday();
+        toast('ИИ-план готов', 'ok');
+      } catch (e) {
+        toast(e.message || 'Ошибка ИИ', 'err');
+      }
+    }
+
+    function completeQuest(id) {
+      const q = state.dayPlan.find(x => x.id === id);
+      if (!q || q.done) return;
+      q.done = true;
+      state.xp = (state.xp || 0) + (q.xp || 20);
+      if (state.skills[q.skill]) {
+        state.skills[q.skill].xp = (state.skills[q.skill].xp || 0) + (q.xp || 20);
+        state.skills[q.skill].level = levelFromXp(state.skills[q.skill].xp);
+      }
+      markActiveToday();
+      state.log.unshift({
+        id: uid(),
+        date: todayKey(),
+        text: '✓ ' + q.title + ' (+' + q.xp + ' XP)',
+        skill: q.skill
+      });
+      if (state.log.length > 100) state.log.length = 100;
+      save();
+      renderToday();
+      renderSkills();
+      toast('+' + q.xp + ' XP · ' + q.title, 'ok');
+    }
+
+    // ——— AI ———
+    async function callAi(system, user) {
+      const key = getApiKey();
+      if (!key) throw new Error('Нет API key');
+      let base = (state.ai.base || 'https://api.openai.com/v1').replace(/\/$/, '');
+      if (!base.endsWith('/v1') && !base.includes('/chat/completions')) {
+        /* keep as-is for custom proxies */
+      }
+      const url = base.includes('/chat/completions') ? base : base + '/chat/completions';
+      let res;
+      try {
+        res = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + key
+          },
+          body: JSON.stringify({
+            model: state.ai.model || 'gpt-4o-mini',
+            messages: [
+              { role: 'system', content: system },
+              { role: 'user', content: user }
+            ],
+            temperature: 0.7,
+            max_tokens: 1200
+          })
+        });
+      } catch (e) {
+        throw new Error('Сеть: ' + (e.message || 'Load failed'));
+      }
+      if (!res.ok) {
+        const t = await res.text().catch(() => '');
+        let msg = 'HTTP ' + res.status;
+        try { msg = JSON.parse(t).error?.message || msg; } catch (_) { if (t) msg = t.slice(0, 140); }
+        throw new Error(msg);
+      }
+      const data = await res.json();
+      return data.choices?.[0]?.message?.content || '';
+    }
+
+    function parseJsonArray(text) {
+      if (!text) return null;
+      let t = text.trim();
+      const fence = t.match(/```(?:json)?\s*([\s\S]*?)```/i);
+      if (fence) t = fence[1].trim();
+      const a = t.indexOf('['), b = t.lastIndexOf(']');
+      if (a >= 0 && b > a) t = t.slice(a, b + 1);
+      return JSON.parse(t);
+    }
+
+    function tutorSystemPrompt() {
+      const cefr = state.cefr;
+      const goal = state.goal || 'general fluency';
+      const base = `You are a friendly, strict-when-needed English tutor inside ENGLISH LIFE RPG.
+Student CEFR: ${cefr}. Goal: ${goal}.
+Rules:
+- Prefer English in examples; short Russian only when explaining hard points.
+- Correct mistakes gently: show corrected line + 1 tip.
+- Keep replies concise (under 180 words) unless student asks for more.
+- Push the student to produce language, not only read theory.`;
+
+      if (tutorMode === 'correct') {
+        return base + `\nMode: CORRECT TEXT. Student pastes English. Reply with: 1) Corrected version 2) Bullet list of key fixes 3) One better alternative phrase.`;
+      }
+      if (tutorMode === 'vocab') {
+        return base + `\nMode: VOCABULARY. Teach 5 useful words/phrases at ${cefr} for a topic the student chooses (or daily life). For each: word, simple definition, 1 example sentence. End with a 3-question mini quiz.`;
+      }
+      if (tutorMode === 'role') {
+        return base + `\nMode: ROLEPLAY. Stay in character. Start a realistic scenario at ${cefr} difficulty. After each student reply, continue the scene and briefly note 1 improvement if needed in [brackets].`;
+      }
+      return base + `\nMode: FREE DIALOGUE. Chat naturally, ask follow-ups, correct only important errors inline.`;
+    }
+
+    async function sendChat() {
+      if (chatBusy) return;
+      const input = document.getElementById('chatInput');
+      const text = (input.value || '').trim();
+      if (!text) return;
+      if (!hasAi()) {
+        toast('Настрой ИИ в Ещё', 'err');
+        switchScreen('settings');
+        return;
+      }
+      input.value = '';
+      state.chat.push({ role: 'user', text, mode: tutorMode, ts: Date.now() });
+      if (state.chat.length > 40) state.chat = state.chat.slice(-40);
+      save();
+      renderChat();
+      chatBusy = true;
+      document.getElementById('sendBtn').disabled = true;
+      try {
+        const history = state.chat.slice(-8).map(m =>
+          (m.role === 'user' ? 'Student: ' : 'Tutor: ') + m.text
+        ).join('\n');
+        const reply = await callAi(tutorSystemPrompt(), history + '\nTutor:');
+        state.chat.push({ role: 'bot', text: reply.trim(), mode: tutorMode, ts: Date.now() });
+        // small XP for practice
+        state.xp += 8;
+        if (tutorMode === 'speaking' || tutorMode === 'role' || tutorMode === 'chat') {
+          state.skills.speaking.xp += 8;
+          state.skills.speaking.level = levelFromXp(state.skills.speaking.xp);
+        } else if (tutorMode === 'correct' || tutorMode === 'vocab') {
+          state.skills.writing.xp += 5;
+          state.skills.vocab.xp += 5;
+          state.skills.writing.level = levelFromXp(state.skills.writing.xp);
+          state.skills.vocab.level = levelFromXp(state.skills.vocab.xp);
+        }
+        markActiveToday();
+        save();
+        renderChat();
+      } catch (e) {
+        toast(e.message || 'Ошибка ИИ', 'err');
+        state.chat.push({ role: 'sys', text: 'Ошибка: ' + (e.message || 'fail'), ts: Date.now() });
+        renderChat();
+      }
+      chatBusy = false;
+      document.getElementById('sendBtn').disabled = false;
+    }
+
+    // ——— RENDER ———
+    function renderToday() {
+      ensureDayPlan();
+      const el = document.getElementById('todayContent');
+      const prog = xpInLevel(state.xp || 0);
+      const done = state.dayPlan.filter(q => q.done).length;
+      const total = state.dayPlan.length;
+      const minsDone = state.dayPlan.filter(q => q.done).reduce((s, q) => s + q.mins, 0);
+      const minsTotal = state.dayPlan.reduce((s, q) => s + q.mins, 0);
+      const pct = total ? Math.round((done / total) * 100) : 0;
+
+      el.innerHTML = `
+        <div class="hero-card">
+          <div class="flex-between">
+            <div class="hero-name">${esc(state.name)}</div>
+            <span class="badge">${esc(state.cefr)}</span>
+          </div>
+          <div class="hero-lvl">LVL ${prog.level}</div>
+          <div class="progress-wrap"><div class="progress-bar" style="width:${prog.percent}%"></div></div>
+          <div style="font-size:0.82rem;color:var(--text-muted)">${state.xp} XP · серия <span class="mins">${state.streak || 0}</span> дн</div>
+          ${state.goal ? `<div style="margin-top:8px;font-size:0.84rem;color:var(--text-dim)">Цель: ${esc(state.goal)}</div>` : ''}
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-mini"><div class="v">${done}/${total}</div><div class="l">Квесты</div></div>
+          <div class="stat-mini"><div class="v">${minsDone}</div><div class="l">Мин ✓</div></div>
+          <div class="stat-mini"><div class="v">${minsTotal}</div><div class="l">План, мин</div></div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <div class="flex-between" style="margin-bottom:10px">
+            <strong style="font-size:0.95rem">План на сегодня</strong>
+            <span class="badge badge-gold">${pct}%</span>
+          </div>
+          <div class="progress-wrap"><div class="progress-bar gold" style="width:${pct}%"></div></div>
+          <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+            <button class="btn btn-secondary btn-sm" onclick="regenerateDay()">Стандартный план</button>
+            <button class="btn btn-primary btn-sm" onclick="aiDayPlan()">ИИ-план</button>
+          </div>
+        </div>
+
+        ${state.dayPlan.map(q => {
+          const sk = SKILLS.find(s => s.id === q.skill);
+          return `
+          <div class="card quest-card ${q.done ? 'done' : ''}">
+            <div class="q-title">${esc(q.title)}</div>
+            <div class="q-meta">
+              <span class="badge">${sk ? sk.ico + ' ' + sk.name : q.skill}</span>
+              <span class="badge badge-gold">${q.mins} мин</span>
+              <span class="badge badge-green">+${q.xp} XP</span>
+            </div>
+            <div class="q-desc">${esc(q.desc)}</div>
+            <div class="q-actions">
+              ${q.done
+                ? '<span class="badge badge-green">Готово</span>'
+                : `<button class="btn btn-success btn-sm" onclick="completeQuest('${q.id}')">Сделал</button>
+                   <button class="btn btn-secondary btn-sm" onclick="switchScreen('practice')">С тьютором</button>`}
+            </div>
+          </div>`;
+        }).join('')}
+
+        <div class="card">
+          <strong style="font-size:0.9rem">Как качать язык 30–60 мин</strong>
+          <p style="font-size:0.84rem;color:var(--text-dim);margin-top:8px;line-height:1.5">
+            1) Закрой квесты дня без идеальности.<br>
+            2) 10+ минут говори или пиши сам (не только читай).<br>
+            3) Раз в день — ИИ-тьютор: диалог или «исправь текст».<br>
+            4) Серия дней важнее одного «марафона».
+          </p>
+        </div>
+      `;
+    }
+
+    function renderSkills() {
+      const el = document.getElementById('skillsContent');
+      el.innerHTML = `
+        <div class="card">
+          ${SKILLS.map(s => {
+            const d = state.skills[s.id] || { xp: 0, level: 1 };
+            const p = xpInLevel(d.xp || 0);
+            return `
+              <div class="skill-row">
+                <div class="skill-ico">${s.ico}</div>
+                <div class="skill-info">
+                  <div class="skill-name">${s.name}</div>
+                  <div class="skill-lvl">LVL ${p.level} · ${d.xp || 0} XP · ${s.tip}</div>
+                  <div class="progress-wrap" style="margin:6px 0 0"><div class="progress-bar" style="width:${p.percent}%"></div></div>
+                </div>
+              </div>`;
+          }).join('')}
+        </div>
+        <div class="card">
+          <p style="font-size:0.86rem;color:var(--text-dim);line-height:1.5">
+            Навыки растут от квестов и чата с тьютором. Не пытайся качать всё сразу:
+            в дни с малым временем бери Listening + Vocab, в дни с голосом — Speaking.
+          </p>
+        </div>
+      `;
+    }
+
+    function renderChat() {
+      const el = document.getElementById('chatMessages');
+      if (!state.chat.length) {
+        el.innerHTML = `<div class="msg sys">Выбери режим сверху и напиши на английском.<br>Пример: "Let's talk about my weekend" или вставь текст для правки.</div>`;
+        return;
+      }
+      el.innerHTML = state.chat.map(m => {
+        const cls = m.role === 'user' ? 'user' : m.role === 'bot' ? 'bot' : 'sys';
+        return `<div class="msg ${cls}">${esc(m.text)}</div>`;
+      }).join('');
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function renderLog() {
+      const el = document.getElementById('logContent');
+      if (!state.log.length) {
+        el.innerHTML = `<div class="empty"><h3>Пока пусто</h3><p>Закрывай квесты — записи появятся сами. Или добавь заметку вручную.</p></div>`;
+        return;
+      }
+      el.innerHTML = state.log.map(l => `
+        <div class="card" style="padding:12px 14px">
+          <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:4px">${esc(l.date)}${l.skill ? ' · ' + l.skill : ''}</div>
+          <div style="font-size:0.9rem">${esc(l.text)}</div>
+        </div>
+      `).join('');
+    }
+
+    function addLogManual() {
+      const text = prompt('Что сделал / чему научился?');
+      if (!text || !text.trim()) return;
+      state.log.unshift({ id: uid(), date: todayKey(), text: text.trim().slice(0, 300) });
+      markActiveToday();
+      save();
+      renderLog();
+      toast('Запись добавлена', 'ok');
+    }
+
+    function populateSettings() {
+      document.getElementById('setName').value = state.name || '';
+      document.getElementById('setCefr').value = state.cefr || 'A2';
+      document.getElementById('setMinutes').value = String(state.minutesTarget || 30);
+      document.getElementById('setGoal').value = state.goal || '';
+      document.getElementById('setApiBase').value = state.ai.base || 'https://api.openai.com/v1';
+      document.getElementById('setApiKey').value = getApiKey();
+      document.getElementById('setModel').value = state.ai.model || 'gpt-4o-mini';
+      document.getElementById('aiStatus').textContent = hasAi() ? 'ИИ: ключ сохранён на устройстве' : 'ИИ: ключ не задан';
+    }
+
+    function saveProfile() {
+      state.name = (document.getElementById('setName').value || 'Learner').trim().slice(0, 32);
+      const cefr = document.getElementById('setCefr').value;
+      const mins = parseInt(document.getElementById('setMinutes').value, 10) || 30;
+      const cefrChanged = cefr !== state.cefr;
+      const minsChanged = mins !== state.minutesTarget;
+      state.cefr = cefr;
+      state.minutesTarget = mins;
+      state.goal = (document.getElementById('setGoal').value || '').trim().slice(0, 120);
+      if (cefrChanged || minsChanged) {
+        state.dayKey = null;
+        ensureDayPlan();
+      }
+      save();
+      toast('Профиль сохранён', 'ok');
+      renderToday();
+    }
+
+    function saveAi() {
+      state.ai.base = (document.getElementById('setApiBase').value || 'https://api.openai.com/v1').trim().replace(/\/$/, '');
+      state.ai.model = (document.getElementById('setModel').value || 'gpt-4o-mini').trim();
+      setApiKey((document.getElementById('setApiKey').value || '').trim());
+      save();
+      populateSettings();
+      toast(hasAi() ? 'ИИ сохранён' : 'Ключ пустой', hasAi() ? 'ok' : 'err');
+    }
+
+    async function testAi() {
+      saveAi();
+      if (!hasAi()) { toast('Нужен API key', 'err'); return; }
+      toast('Проверяю…');
+      try {
+        const r = await callAi('Reply with one word: ok', 'ping');
+        toast('Связь ок: ' + (r || '').slice(0, 40), 'ok');
+      } catch (e) {
+        toast(e.message || 'Ошибка', 'err');
+      }
+    }
+
+    function exportData() {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'english-life-rpg-save.json';
+      a.click();
+      toast('Экспорт без API-ключа', 'ok');
+    }
+
+    function resetAll() {
+      setApiKey('');
+      localStorage.removeItem(STORAGE);
+      state = defaultState();
+      ensureDayPlan();
+      save();
+      renderAll();
+      toast('Сброшено', 'ok');
+    }
+
+    function esc(s) {
+      return String(s || '')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function switchScreen(name) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      const screen = document.getElementById('screen-' + name);
+      if (screen) screen.classList.add('active');
+      const btn = document.querySelector(`.nav-btn[data-screen="${name}"]`);
+      if (btn) btn.classList.add('active');
+      if (name === 'today') renderToday();
+      if (name === 'skills') renderSkills();
+      if (name === 'practice') renderChat();
+      if (name === 'log') renderLog();
+      if (name === 'settings') populateSettings();
+    }
+
+    function renderAll() {
+      renderToday();
+      renderSkills();
+      renderChat();
+      renderLog();
+    }
+
+    // nav
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchScreen(btn.dataset.screen));
+    });
+
+    document.getElementById('tutorModes').addEventListener('click', e => {
+      const chip = e.target.closest('.chip');
+      if (!chip) return;
+      document.querySelectorAll('#tutorModes .chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      tutorMode = chip.dataset.mode;
+      toast('Режим: ' + chip.textContent, 'ok');
+    });
+
+    // expose
+    window.switchScreen = switchScreen;
+    window.completeQuest = completeQuest;
+    window.regenerateDay = regenerateDay;
+    window.aiDayPlan = aiDayPlan;
+    window.sendChat = sendChat;
+    window.saveProfile = saveProfile;
+    window.saveAi = saveAi;
+    window.testAi = testAi;
+    window.exportData = exportData;
+    window.resetAll = resetAll;
+    window.addLogManual = addLogManual;
+
+    load();
+    renderAll();
+  })();
+  </script>
+</body>
+</html>
