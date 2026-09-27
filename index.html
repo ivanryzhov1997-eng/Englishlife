@@ -356,26 +356,34 @@
       </div>
 
       <div class="card">
-        <h3 style="font-size:0.95rem;margin-bottom:10px">ИИ (OpenAI-compatible)</h3>
+        <h3 style="font-size:0.95rem;margin-bottom:10px">ИИ (Groq + Proxy)</h3>
         <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:12px;line-height:1.45">
-          Подходит ChatGPT API, Groq, OpenRouter и любой proxy с форматом chat/completions.
-          Ключ хранится только на этом устройстве.
+          <strong>Просто скопируй и вставь</strong> из Supabase (как в LIFE RPG). Прямой gsk_ из браузера часто даёт Load failed.
         </p>
+        <p id="aiStatus" style="font-size:0.85rem;color:var(--text-dim);margin-bottom:12px"></p>
         <div class="form-group">
-          <label>API Base URL</label>
-          <input type="url" id="setApiBase" placeholder="https://api.openai.com/v1">
+          <label>1. Proxy URL (Edge Function)</label>
+          <input type="url" id="setProxyUrl" placeholder="https://xxxx.supabase.co/functions/v1/groq-proxy" autocomplete="off">
         </div>
         <div class="form-group">
-          <label>API Key</label>
-          <input type="password" id="setApiKey" placeholder="sk-… или gsk-…" autocomplete="off">
+          <label>2. Anon / Publishable key</label>
+          <input type="text" id="setAnonKey" placeholder="sb_publishable_… или eyJ…" autocomplete="off">
         </div>
         <div class="form-group">
           <label>Модель</label>
-          <input type="text" id="setModel" placeholder="gpt-4o-mini">
+          <select id="setModel">
+            <option value="openai/gpt-oss-20b">GPT-OSS 20B (быстро)</option>
+            <option value="openai/gpt-oss-120b">GPT-OSS 120B</option>
+            <option value="llama-3.1-8b-instant">Llama 3.1 8B</option>
+            <option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
+          </select>
         </div>
-        <button class="btn btn-primary btn-block" onclick="saveAi()" style="margin-bottom:8px">Сохранить ИИ</button>
+        <button class="btn btn-primary btn-block" onclick="saveAi()" style="margin-bottom:8px">Сохранить</button>
         <button class="btn btn-secondary btn-block" onclick="testAi()">Проверить связь</button>
-        <p id="aiStatus" style="font-size:0.8rem;color:var(--text-muted);margin-top:10px"></p>
+        <p style="font-size:0.75rem;color:var(--text-muted);margin-top:12px;line-height:1.45">
+          URL: Edge Functions → groq-proxy → скопировать ссылку.<br>
+          Key: Settings → API Keys → Publishable (или legacy anon).
+        </p>
       </div>
 
       <div class="card">
@@ -397,6 +405,12 @@
   (function () {
     const STORAGE = 'english_life_rpg_v1';
     const SECRET = 'english_life_rpg_key';
+    const PROXY_LS = 'english_life_rpg_proxy';
+    const ANON_LS = 'english_life_rpg_anon';
+    // Можно оставить пустым — proxy вставляется в Ещё (скопировать/вставить).
+    const DEFAULT_PROXY_URL = '';
+    const DEFAULT_SUPABASE_ANON_KEY = '';
+    const GROQ_BASE = 'https://api.groq.com/openai/v1';
 
     const SKILLS = [
       { id: 'listening', name: 'Listening', ico: '🎧', tip: 'Подкасты, видео, диктанты' },
@@ -473,7 +487,7 @@
         dayKey: null,
         log: [],
         chat: [],
-        ai: { base: 'https://api.openai.com/v1', model: 'gpt-4o-mini' }
+        ai: { base: GROQ_BASE, model: 'openai/gpt-oss-20b' }
       };
     }
 
@@ -508,8 +522,41 @@
       } catch (e) {}
     }
 
+    function getProxyUrl() {
+      try {
+        const u = (localStorage.getItem(PROXY_LS) || DEFAULT_PROXY_URL || '').trim();
+        return u.replace(/\/$/, '');
+      } catch (e) {
+        return (DEFAULT_PROXY_URL || '').trim().replace(/\/$/, '');
+      }
+    }
+
+    function setProxyUrl(u) {
+      try {
+        u = (u || '').trim().replace(/\/$/, '');
+        if (u) localStorage.setItem(PROXY_LS, u);
+        else localStorage.removeItem(PROXY_LS);
+      } catch (e) {}
+    }
+
+    function getAnonKey() {
+      try {
+        return (localStorage.getItem(ANON_LS) || DEFAULT_SUPABASE_ANON_KEY || '').trim();
+      } catch (e) {
+        return (DEFAULT_SUPABASE_ANON_KEY || '').trim();
+      }
+    }
+
+    function setAnonKey(k) {
+      try {
+        k = (k || '').trim();
+        if (k) localStorage.setItem(ANON_LS, k);
+        else localStorage.removeItem(ANON_LS);
+      } catch (e) {}
+    }
+
     function hasAi() {
-      return !!(getApiKey() && state.ai && state.ai.base);
+      return !!(getProxyUrl() || getApiKey());
     }
 
     function toast(msg, type) {
@@ -641,38 +688,50 @@
 
     // ——— AI ———
     async function callAi(system, user) {
-      const key = getApiKey();
-      if (!key) throw new Error('Нет API key');
-      let base = (state.ai.base || 'https://api.openai.com/v1').replace(/\/$/, '');
-      if (!base.endsWith('/v1') && !base.includes('/chat/completions')) {
-        /* keep as-is for custom proxies */
+      if (!hasAi()) throw new Error('Нет ИИ: proxy или ключ Groq');
+      const proxy = getProxyUrl();
+      const url = proxy || (GROQ_BASE + '/chat/completions');
+      const headers = { 'Content-Type': 'application/json' };
+      if (proxy) {
+        const anon = getAnonKey();
+        if (anon) {
+          headers['Authorization'] = 'Bearer ' + anon;
+          headers['apikey'] = anon;
+        }
+      } else {
+        const k = getApiKey();
+        if (!k) throw new Error('Нужен Proxy URL (рекомендуется) или ключ Groq');
+        headers['Authorization'] = 'Bearer ' + k;
       }
-      const url = base.includes('/chat/completions') ? base : base + '/chat/completions';
       let res;
       try {
         res = await fetch(url, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + key
-          },
+          headers,
           body: JSON.stringify({
-            model: state.ai.model || 'gpt-4o-mini',
+            model: (state.ai && state.ai.model) || 'openai/gpt-oss-20b',
             messages: [
               { role: 'system', content: system },
               { role: 'user', content: user }
             ],
             temperature: 0.7,
-            max_completion_tokens: 1200
+            max_tokens: 1200
           })
         });
       } catch (e) {
         throw new Error('Сеть: ' + (e.message || 'Load failed'));
       }
       if (!res.ok) {
-        const t = await res.text().catch(() => '');
+        const txt = await res.text().catch(() => '');
         let msg = 'HTTP ' + res.status;
-        try { msg = JSON.parse(t).error?.message || msg; } catch (_) { if (t) msg = t.slice(0, 140); }
+        try {
+          const err = JSON.parse(txt);
+          msg = err.error?.message || err.message || msg;
+          if (typeof err.error === 'string') msg = err.error;
+        } catch (_) {
+          if (txt) msg = txt.slice(0, 160);
+        }
+        if (res.status === 401) msg += ' — ключ/JWT/proxy';
         throw new Error(msg);
       }
       const data = await res.json();
@@ -900,10 +959,17 @@ Rules:
       document.getElementById('setCefr').value = state.cefr || 'A2';
       document.getElementById('setMinutes').value = String(state.minutesTarget || 30);
       document.getElementById('setGoal').value = state.goal || '';
-      document.getElementById('setApiBase').value = state.ai.base || 'https://api.openai.com/v1';
-      document.getElementById('setApiKey').value = getApiKey();
-      document.getElementById('setModel').value = state.ai.model || 'gpt-4o-mini';
-      document.getElementById('aiStatus').textContent = hasAi() ? 'ИИ: ключ сохранён на устройстве' : 'ИИ: ключ не задан';
+      const proxyEl = document.getElementById('setProxyUrl');
+      if (proxyEl) proxyEl.value = getProxyUrl();
+      const anonEl = document.getElementById('setAnonKey');
+      if (anonEl) anonEl.value = getAnonKey();
+      const modelEl = document.getElementById('setModel');
+      if (modelEl) modelEl.value = (state.ai && state.ai.model) || 'openai/gpt-oss-20b';
+      const st = document.getElementById('aiStatus');
+      if (st) {
+        if (getProxyUrl()) st.textContent = 'Статус: Proxy задан' + (getAnonKey() ? ' + key' : ' (добавь anon key при 401)');
+        else st.textContent = 'Статус: вставь Proxy URL из Supabase';
+      }
     }
 
     function saveProfile() {
@@ -925,17 +991,20 @@ Rules:
     }
 
     function saveAi() {
-      state.ai.base = (document.getElementById('setApiBase').value || 'https://api.openai.com/v1').trim().replace(/\/$/, '');
-      state.ai.model = (document.getElementById('setModel').value || 'gpt-4o-mini').trim();
-      setApiKey((document.getElementById('setApiKey').value || '').trim());
+      if (!state.ai) state.ai = { base: GROQ_BASE, model: 'openai/gpt-oss-20b' };
+      state.ai.base = GROQ_BASE;
+      const modelEl = document.getElementById('setModel');
+      state.ai.model = (modelEl && modelEl.value) || 'openai/gpt-oss-20b';
+      setProxyUrl(document.getElementById('setProxyUrl')?.value || '');
+      setAnonKey(document.getElementById('setAnonKey')?.value || '');
       save();
       populateSettings();
-      toast(hasAi() ? 'ИИ сохранён' : 'Ключ пустой', hasAi() ? 'ok' : 'err');
+      toast(hasAi() ? 'ИИ сохранён' : 'Вставь Proxy URL', hasAi() ? 'ok' : 'err');
     }
 
     async function testAi() {
       saveAi();
-      if (!hasAi()) { toast('Нужен API key', 'err'); return; }
+      if (!hasAi()) { toast('Сначала вставь Proxy URL', 'err'); return; }
       toast('Проверяю…');
       try {
         const r = await callAi('Reply with one word: ok', 'ping');
