@@ -4,1092 +4,1447 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#12141a">
-  <meta name="description" content="ENGLISH LIFE RPG — выучи английский как игру: 30–60 минут в день, квесты, ИИ-тьютор.">
-  <title>ENGLISH LIFE RPG</title>
+  <meta name="theme-color" content="#0c1220">
+  <title>ENCORE — English in minimal time</title>
   <style>
     :root {
-      --bg: #12141a;
-      --bg2: #181b24;
-      --panel: #1c2030;
-      --panel-hover: #242a3c;
-      --border: rgba(180, 200, 255, 0.08);
-      --border-light: rgba(180, 200, 255, 0.14);
-      --accent: #7eb6ff;
-      --gold: #e0b878;
-      --green: #6bcf8e;
-      --red: #e07a7a;
-      --text: #eef2ff;
-      --text-dim: #a8b0c8;
-      --text-muted: #6b7390;
-      --radius: 16px;
-      --radius-sm: 12px;
-      --nav-h: 58px;
-      --safe-top: env(safe-area-inset-top, 0px);
-      --safe-bottom: env(safe-area-inset-bottom, 0px);
-      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --bg: #0c1220;
+      --bg2: #121a2b;
+      --panel: #162033;
+      --panel2: #1c2a42;
+      --border: rgba(140, 180, 255, 0.1);
+      --border2: rgba(140, 180, 255, 0.18);
+      --text: #e8eef8;
+      --muted: #8b9bb5;
+      --dim: #5c6d88;
+      --accent: #4f8cff;
+      --accent2: #7eb0ff;
+      --green: #3dd68c;
+      --gold: #f0c14d;
+      --red: #ff6b7a;
+      --orange: #ff9f43;
+      --radius: 14px;
+      --nav-h: 60px;
+      --safe-t: env(safe-area-inset-top, 0px);
+      --safe-b: env(safe-area-inset-bottom, 0px);
+      --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
     html, body {
       height: 100%; height: 100dvh; overflow: hidden;
-      font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-      background: var(--bg); color: var(--text);
-      line-height: 1.5; -webkit-font-smoothing: antialiased;
+      font-family: var(--font); background: var(--bg); color: var(--text);
+      -webkit-font-smoothing: antialiased; line-height: 1.5;
     }
-
     body {
       display: flex; flex-direction: column;
-      padding-top: var(--safe-top);
       background:
-        radial-gradient(ellipse 100% 60% at 50% -10%, rgba(126, 182, 255, 0.12), transparent 50%),
+        radial-gradient(ellipse 90% 50% at 100% -10%, rgba(79, 140, 255, 0.14), transparent 50%),
+        radial-gradient(ellipse 60% 40% at 0% 80%, rgba(61, 214, 140, 0.06), transparent 45%),
         var(--bg);
+      padding-top: var(--safe-t);
     }
+    .screens { flex: 1; min-height: 0; overflow: hidden; padding-bottom: calc(var(--nav-h) + var(--safe-b)); }
+    .screen { display: none; height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 14px 16px 24px; }
+    .screen.active { display: block; animation: in 0.2s ease; }
+    @keyframes in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
     .nav {
-      position: fixed; bottom: 0; left: 0; right: 0;
-      height: calc(var(--nav-h) + var(--safe-bottom));
-      padding-bottom: var(--safe-bottom);
-      background: rgba(18, 20, 26, 0.92);
-      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-      border-top: 1px solid var(--border);
-      display: flex; z-index: 1000;
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+      height: calc(var(--nav-h) + var(--safe-b)); padding-bottom: var(--safe-b);
+      background: rgba(12, 18, 32, 0.94); backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border); display: flex;
     }
-
-    .nav-btn {
-      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 3px; background: none; border: none; color: var(--text-muted);
-      font-size: 10px; font-weight: 500; cursor: pointer; min-height: 44px;
-      font-family: inherit; transition: color 0.2s var(--ease);
+    .nav button {
+      flex: 1; background: none; border: none; color: var(--dim); font-size: 10px; font-weight: 600;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+      cursor: pointer; font-family: inherit; min-height: 48px;
     }
-    .nav-btn .ico { font-size: 18px; line-height: 1; opacity: 0.55; }
-    .nav-btn.active { color: var(--accent); }
-    .nav-btn.active .ico { opacity: 1; }
+    .nav button.active { color: var(--accent2); }
+    .nav button .ico { font-size: 18px; line-height: 1; }
 
-    .screens {
-      flex: 1; overflow: hidden; min-height: 0;
-      padding-bottom: calc(var(--nav-h) + var(--safe-bottom));
-    }
-
-    .screen {
-      display: none; height: 100%; overflow-y: auto; overflow-x: hidden;
-      -webkit-overflow-scrolling: touch; padding: 14px 16px 24px;
-    }
-    .screen.active { display: block; animation: fadeIn 0.22s ease; }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .header { margin-bottom: 18px; }
-    .header h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.4px; }
-    .header p { color: var(--text-muted); font-size: 0.84rem; margin-top: 3px; }
-
+    h1 { font-size: 1.35rem; font-weight: 750; letter-spacing: -0.4px; }
+    .sub { color: var(--muted); font-size: 0.84rem; margin-top: 2px; }
     .card {
-      background: var(--panel); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 16px; margin-bottom: 12px;
+      background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 16px; margin-bottom: 12px;
     }
-
     .btn {
       display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-      padding: 12px 16px; border-radius: var(--radius-sm); border: none;
-      font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: inherit;
-      min-height: 44px; transition: transform 0.15s, opacity 0.15s;
+      min-height: 44px; padding: 10px 16px; border-radius: 10px; border: none;
+      font-size: 0.9rem; font-weight: 650; font-family: inherit; cursor: pointer;
+      transition: transform 0.12s, opacity 0.12s;
     }
     .btn:active { transform: scale(0.97); opacity: 0.9; }
-    .btn-primary {
-      background: linear-gradient(180deg, #9ec8ff 0%, #7eb6ff 100%);
-      color: #0c1220;
-    }
-    .btn-secondary {
-      background: rgba(180, 200, 255, 0.06); color: var(--text);
-      border: 1px solid var(--border-light);
-    }
-    .btn-success {
-      background: rgba(107, 207, 142, 0.15); color: var(--green);
-      border: 1px solid rgba(107, 207, 142, 0.3);
-    }
-    .btn-sm { padding: 8px 12px; font-size: 0.8rem; min-height: 36px; }
+    .btn-primary { background: linear-gradient(180deg, #6ba0ff, #4f8cff); color: #061028; box-shadow: 0 4px 16px rgba(79,140,255,0.3); }
+    .btn-secondary { background: rgba(140,180,255,0.08); color: var(--text); border: 1px solid var(--border2); }
+    .btn-success { background: rgba(61,214,140,0.15); color: var(--green); border: 1px solid rgba(61,214,140,0.35); }
+    .btn-danger { background: rgba(255,107,122,0.12); color: var(--red); border: 1px solid rgba(255,107,122,0.3); }
     .btn-block { width: 100%; }
-
-    .progress-wrap {
-      height: 6px; background: rgba(180, 200, 255, 0.08);
-      border-radius: 99px; overflow: hidden; margin: 10px 0;
+    .btn-sm { min-height: 36px; padding: 6px 12px; font-size: 0.8rem; border-radius: 8px; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .progress {
+      height: 6px; background: rgba(140,180,255,0.1); border-radius: 99px; overflow: hidden; margin: 8px 0;
     }
-    .progress-bar {
-      height: 100%; border-radius: 99px;
-      background: linear-gradient(90deg, #5a9eef, #7eb6ff);
-      transition: width 0.4s var(--ease);
-    }
-    .progress-bar.gold { background: linear-gradient(90deg, #c49a5c, #e0b878); }
-    .progress-bar.green { background: linear-gradient(90deg, #4aaf72, #6bcf8e); }
-
+    .progress > i { display: block; height: 100%; background: linear-gradient(90deg, #3d7aef, #6ba0ff); border-radius: 99px; }
     .badge {
-      display: inline-flex; padding: 3px 9px; border-radius: 99px;
-      font-size: 0.68rem; font-weight: 650; letter-spacing: 0.3px;
-      text-transform: uppercase; background: rgba(126, 182, 255, 0.12); color: var(--accent);
+      display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 3px 8px;
+      border-radius: 99px; background: rgba(79,140,255,0.15); color: var(--accent2);
     }
-    .badge-gold { background: rgba(224, 184, 120, 0.15); color: var(--gold); }
-    .badge-green { background: rgba(107, 207, 142, 0.15); color: var(--green); }
-
-    .hero-card {
-      background: linear-gradient(165deg, rgba(126, 182, 255, 0.1) 0%, var(--panel) 45%);
-      border: 1px solid var(--border); border-radius: calc(var(--radius) + 2px);
-      padding: 20px; margin-bottom: 14px;
+    .badge-gold { background: rgba(240,193,77,0.15); color: var(--gold); }
+    .badge-green { background: rgba(61,214,140,0.15); color: var(--green); }
+    input, textarea, select {
+      width: 100%; padding: 12px 14px; background: var(--bg2); border: 1px solid var(--border2);
+      border-radius: 10px; color: var(--text); font-size: 0.95rem; font-family: inherit; outline: none;
     }
-    .hero-name { font-size: 1.05rem; font-weight: 600; }
-    .hero-lvl {
-      font-size: 2.4rem; font-weight: 750; letter-spacing: -1.5px;
-      line-height: 1.1; margin: 8px 0 4px;
-    }
-    .stats-row {
-      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 12px;
-    }
-    .stat-mini {
-      background: rgba(180, 200, 255, 0.04); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); padding: 12px 10px; text-align: center;
-    }
-    .stat-mini .v { font-size: 1.2rem; font-weight: 700; }
-    .stat-mini .l { font-size: 0.68rem; color: var(--text-muted); margin-top: 2px; }
-
-    .quest-card { position: relative; }
-    .quest-card.done { opacity: 0.55; }
-    .quest-card.done .q-title { text-decoration: line-through; color: var(--text-dim); }
-    .q-title { font-size: 1rem; font-weight: 650; margin-bottom: 6px; }
-    .q-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
-    .q-desc { font-size: 0.86rem; color: var(--text-dim); margin-bottom: 12px; line-height: 1.5; }
-    .q-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-
-    .skill-row {
-      display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
-    }
-    .skill-row:last-child { margin-bottom: 0; }
-    .skill-ico {
-      width: 40px; height: 40px; border-radius: 12px;
-      background: rgba(126, 182, 255, 0.1); display: flex; align-items: center;
-      justify-content: center; font-size: 1.1rem; flex-shrink: 0;
-    }
-    .skill-info { flex: 1; min-width: 0; }
-    .skill-name { font-weight: 600; font-size: 0.92rem; }
-    .skill-lvl { font-size: 0.75rem; color: var(--text-muted); }
-
-    .chat-box {
-      display: flex; flex-direction: column; height: calc(100dvh - var(--nav-h) - var(--safe-bottom) - var(--safe-top) - 120px);
-      min-height: 320px;
-    }
-    .chat-messages {
-      flex: 1; overflow-y: auto; padding: 8px 0 12px;
-      display: flex; flex-direction: column; gap: 10px;
-    }
-    .msg {
-      max-width: 88%; padding: 12px 14px; border-radius: 14px;
-      font-size: 0.9rem; line-height: 1.45; white-space: pre-wrap; word-break: break-word;
-    }
-    .msg.user {
-      align-self: flex-end; background: rgba(126, 182, 255, 0.18);
-      border: 1px solid rgba(126, 182, 255, 0.25);
-    }
-    .msg.bot {
-      align-self: flex-start; background: var(--panel);
-      border: 1px solid var(--border);
-    }
-    .msg.sys {
-      align-self: center; background: transparent; color: var(--text-muted);
-      font-size: 0.8rem; text-align: center; max-width: 100%;
-    }
-    .chat-input-row {
-      display: flex; gap: 8px; padding-top: 8px; border-top: 1px solid var(--border);
-    }
-    .chat-input-row textarea {
-      flex: 1; min-height: 44px; max-height: 120px; resize: none;
-      padding: 12px; background: rgba(180, 200, 255, 0.05);
-      border: 1px solid var(--border); border-radius: var(--radius-sm);
-      color: var(--text); font-family: inherit; font-size: 0.95rem; outline: none;
-    }
-    .chat-input-row textarea:focus { border-color: rgba(126, 182, 255, 0.4); }
-
-    .mode-chips { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; }
-    .chip {
-      flex-shrink: 0; padding: 8px 14px; border-radius: 99px;
-      border: 1px solid var(--border); background: transparent;
-      color: var(--text-muted); font-size: 0.8rem; font-weight: 550;
-      cursor: pointer; font-family: inherit;
-    }
-    .chip.active {
-      background: rgba(126, 182, 255, 0.15);
-      border-color: rgba(126, 182, 255, 0.35); color: var(--accent);
-    }
-
-    .form-group { margin-bottom: 14px; }
-    .form-group label {
-      display: block; font-size: 0.75rem; font-weight: 650;
-      color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase;
-      letter-spacing: 0.4px;
-    }
-    .form-group input, .form-group select, .form-group textarea {
-      width: 100%; padding: 12px; background: rgba(180, 200, 255, 0.05);
-      border: 1px solid var(--border); border-radius: var(--radius-sm);
-      color: var(--text); font-size: 0.95rem; font-family: inherit; outline: none;
-      min-height: 44px;
-    }
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-      border-color: rgba(126, 182, 255, 0.4);
-    }
-
-    .toast-container {
-      position: fixed; top: calc(12px + var(--safe-top)); left: 50%;
-      transform: translateX(-50%); z-index: 3000; width: min(340px, calc(100% - 32px));
-      pointer-events: none;
-    }
+    textarea { min-height: 90px; resize: vertical; }
+    label { display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+    .fg { margin-bottom: 12px; }
     .toast {
-      background: rgba(28, 32, 48, 0.96); border: 1px solid var(--border-light);
-      border-radius: 14px; padding: 12px 16px; text-align: center;
-      font-size: 0.88rem; font-weight: 550; margin-bottom: 8px;
-      animation: fadeIn 0.25s ease;
+      position: fixed; top: calc(12px + var(--safe-t)); left: 50%; transform: translateX(-50%);
+      z-index: 999; background: var(--panel2); border: 1px solid var(--border2); border-radius: 12px;
+      padding: 12px 18px; font-size: 0.88rem; font-weight: 600; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      max-width: 90%; animation: in 0.2s ease;
     }
-    .toast.ok { border-color: rgba(107, 207, 142, 0.4); }
-    .toast.err { border-color: rgba(224, 122, 122, 0.4); }
-
-    .empty {
-      text-align: center; padding: 36px 16px; color: var(--text-dim);
+    .toast.ok { border-color: rgba(61,214,140,0.4); }
+    .toast.err { border-color: rgba(255,107,122,0.4); }
+    .modal-bg {
+      position: fixed; inset: 0; z-index: 200; background: rgba(6,10,20,0.7);
+      display: none; align-items: flex-end; justify-content: center;
     }
-    .empty h3 { color: var(--text); margin-bottom: 8px; font-size: 1.05rem; }
-    .empty p { font-size: 0.88rem; max-width: 280px; margin: 0 auto 16px; color: var(--text-muted); }
-
-    .mins { color: var(--gold); font-weight: 650; }
-    .flex-between { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+    .modal-bg.open { display: flex; }
+    .modal {
+      width: 100%; max-width: 480px; max-height: 88vh; overflow-y: auto;
+      background: var(--bg2); border: 1px solid var(--border2); border-radius: 18px 18px 0 0;
+      padding: 18px 16px calc(20px + var(--safe-b));
+    }
+    .modal h2 { font-size: 1.15rem; margin-bottom: 12px; }
+    .flash-card {
+      min-height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 24px; cursor: pointer; user-select: none;
+    }
+    .flash-card .front { font-size: 1.6rem; font-weight: 750; }
+    .flash-card .back { font-size: 1.15rem; color: var(--accent2); margin-top: 10px; }
+    .flash-card .ex { font-size: 0.88rem; color: var(--muted); margin-top: 12px; font-style: italic; }
+    .chat { display: flex; flex-direction: column; gap: 10px; max-height: 50vh; overflow-y: auto; margin-bottom: 12px; }
+    .bubble {
+      max-width: 88%; padding: 10px 14px; border-radius: 14px; font-size: 0.92rem; line-height: 1.45;
+    }
+    .bubble.user { align-self: flex-end; background: rgba(79,140,255,0.25); border: 1px solid rgba(79,140,255,0.3); }
+    .bubble.bot { align-self: flex-start; background: var(--panel); border: 1px solid var(--border); }
+    .bubble.sys { align-self: center; background: transparent; color: var(--muted); font-size: 0.8rem; }
+    .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+    .stat {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+      padding: 12px 8px; text-align: center;
+    }
+    .stat .v { font-size: 1.25rem; font-weight: 750; color: var(--accent2); }
+    .stat .l { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+    .step {
+      display: flex; gap: 12px; padding: 14px; border: 1px solid var(--border); border-radius: 12px;
+      margin-bottom: 10px; background: var(--panel); cursor: pointer; align-items: flex-start;
+    }
+    .step.done { opacity: 0.55; }
+    .step .num {
+      width: 28px; height: 28px; border-radius: 8px; background: rgba(79,140,255,0.2);
+      color: var(--accent2); display: flex; align-items: center; justify-content: center;
+      font-weight: 750; font-size: 0.85rem; flex-shrink: 0;
+    }
+    .step.done .num { background: rgba(61,214,140,0.2); color: var(--green); }
+    .step h3 { font-size: 0.95rem; font-weight: 700; }
+    .step p { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
+    .tip {
+      background: rgba(79,140,255,0.08); border: 1px solid rgba(79,140,255,0.2);
+      border-radius: 12px; padding: 12px 14px; font-size: 0.84rem; color: var(--muted); margin-bottom: 14px; line-height: 1.5;
+    }
+    .tip strong { color: var(--text); }
+    .hidden { display: none !important; }
+    .en { font-family: Georgia, 'Times New Roman', serif; }
   </style>
 </head>
 <body>
-  <div class="toast-container" id="toasts"></div>
-
+  <div id="onboard" class="hidden" style="position:fixed;inset:0;z-index:300;background:var(--bg);overflow-y:auto;padding:calc(16px + var(--safe-t)) 16px calc(24px + var(--safe-b))">
+    <div id="onboardInner"></div>
+  </div>
   <div class="screens">
     <!-- TODAY -->
-    <div class="screen active" id="screen-today">
-      <div class="header">
-        <h1>ENGLISH LIFE RPG</h1>
-        <p>30–60 минут · реальный прогресс</p>
-      </div>
-      <div id="todayContent"></div>
-    </div>
-
-    <!-- PRACTICE / AI -->
-    <div class="screen" id="screen-practice">
-      <div class="header">
-        <h1>ИИ-тьютор</h1>
-        <p>Практика с обратной связью</p>
-      </div>
-      <div class="mode-chips" id="tutorModes">
-        <button class="chip active" data-mode="chat">Диалог</button>
-        <button class="chip" data-mode="correct">Исправь текст</button>
-        <button class="chip" data-mode="vocab">Слова</button>
-        <button class="chip" data-mode="role">Ролевая</button>
-      </div>
-      <div class="chat-box">
-        <div class="chat-messages" id="chatMessages"></div>
-        <div class="chat-input-row">
-          <textarea id="chatInput" rows="1" placeholder="Write in English…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat();}"></textarea>
-          <button class="btn btn-primary btn-sm" onclick="sendChat()" id="sendBtn">→</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- SKILLS -->
-    <div class="screen" id="screen-skills">
-      <div class="header">
-        <h1>Навыки</h1>
-        <p>Шесть направлений английского</p>
-      </div>
-      <div id="skillsContent"></div>
-    </div>
-
-    <!-- LOG -->
-    <div class="screen" id="screen-log">
-      <div class="header flex-between">
+    <div class="screen active" id="sc-today">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
         <div>
-          <h1>Журнал</h1>
-          <p>Что сделал и чему научился</p>
+          <h1>Сегодня</h1>
+          <p class="sub" id="todaySub">Разговорный English · 30–60 мин</p>
         </div>
-        <button class="btn btn-secondary btn-sm" onclick="addLogManual()">+</button>
+        <span class="badge" id="cefrBadge">A2</span>
       </div>
-      <div id="logContent"></div>
+      <div class="stat-grid">
+        <div class="stat"><div class="v" id="stStreak">0</div><div class="l">серия, дн</div></div>
+        <div class="stat"><div class="v" id="stMins">0</div><div class="l">мин сегодня</div></div>
+        <div class="stat"><div class="v" id="stWords">0</div><div class="l">слов в колоде</div></div>
+      </div>
+      <div class="card" id="pathCard"></div>
+      <div class="tip" id="methodTip">
+        <strong>Цель: хороший разговорный English.</strong> Частые слова, живые фразы, диалог каждый день. Travel — бонусом в колоде. Грамматика — точечно, в контексте.
+      </div>
     </div>
 
-    <!-- SETTINGS -->
-    <div class="screen" id="screen-settings">
-      <div class="header">
-        <h1>Настройки</h1>
-        <p>Уровень, время, ИИ</p>
+    <!-- WORDS (SRS) -->
+    <div class="screen" id="sc-words">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+        <div>
+          <h1>Слова</h1>
+          <p class="sub">Интервальные повторения (SRS)</p>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="startReview()">Повторить</button>
+      </div>
+      <div class="card" id="srsStats"></div>
+      <div id="wordList"></div>
+      <button class="btn btn-secondary btn-block" style="margin-top:8px" onclick="addWordsForLevel()">+ Слова моего уровня</button>
+    </div>
+
+    <!-- PRACTICE -->
+    <div class="screen" id="sc-practice">
+      <h1 style="margin-bottom:4px">Практика</h1>
+      <p class="sub" style="margin-bottom:14px">Живой разговор: о себе, мнения, планы, быт (+ travel)</p>
+      <div class="card">
+        <h3 style="font-size:0.95rem;margin-bottom:8px">Письмо (5–10 мин)</h3>
+        <p style="font-size:0.84rem;color:var(--muted);margin-bottom:12px">Напиши 4–6 предложений по теме. ИИ поправит и объяснит.</p>
+        <button class="btn btn-primary btn-block" onclick="startWriting()">Написать текст</button>
       </div>
       <div class="card">
-        <div class="form-group">
-          <label>Имя</label>
-          <input type="text" id="setName" maxlength="32" placeholder="Hero name">
-        </div>
-        <div class="form-group">
-          <label>Твой CEFR (сейчас)</label>
+        <h3 style="font-size:0.95rem;margin-bottom:8px">Диалог с тьютором</h3>
+        <p style="font-size:0.84rem;color:var(--muted);margin-bottom:12px">Ролевые диалоги на твоём уровне. Отвечай на English.</p>
+        <button class="btn btn-primary btn-block" onclick="startDialogue()">Начать диалог</button>
+      </div>
+      <div class="card">
+        <h3 style="font-size:0.95rem;margin-bottom:8px">Шаблоны фраз</h3>
+        <p style="font-size:0.84rem;color:var(--muted);margin-bottom:12px">Готовые реплики сразу в речь — быстрее, чем слова по одному.</p>
+        <button class="btn btn-secondary btn-block" onclick="showPatterns()">Открыть шаблоны</button>
+      </div>
+      <div class="card">
+        <h3 style="font-size:0.95rem;margin-bottom:8px">Мини-грамматика</h3>
+        <p style="font-size:0.84rem;color:var(--muted);margin-bottom:12px">Одно правило + примеры + упражнение. Без воды.</p>
+        <button class="btn btn-secondary btn-block" onclick="showGrammar()">Урок грамматики</button>
+      </div>
+    </div>
+
+    <!-- TUTOR -->
+    <div class="screen" id="sc-tutor">
+      <h1 style="margin-bottom:4px">Тьютор</h1>
+      <p class="sub" style="margin-bottom:12px">Свободный чат на English · правки и объяснения</p>
+      <div class="chat" id="chatBox"></div>
+      <div class="row" style="margin-bottom:8px">
+        <button class="btn btn-secondary btn-sm" onclick="tutorPrompt('Correct my last message and explain mistakes simply.')">Править</button>
+        <button class="btn btn-secondary btn-sm" onclick="tutorPrompt('Give me 5 useful phrases for this topic at my level.')">Фразы</button>
+        <button class="btn btn-secondary btn-sm" onclick="clearChat()">Очистить</button>
+      </div>
+      <div class="row">
+        <input type="text" id="chatInput" placeholder="Type in English…" style="flex:1"
+          onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="btn btn-primary" onclick="sendChat()">→</button>
+      </div>
+      <p id="aiHint" style="font-size:0.75rem;color:var(--dim);margin-top:10px"></p>
+    </div>
+
+    <!-- MORE -->
+    <div class="screen" id="sc-more">
+      <h1 style="margin-bottom:14px">Ещё</h1>
+      <div class="card">
+        <h3 style="font-size:0.95rem;margin-bottom:10px">Профиль</h3>
+        <div class="fg"><label>Имя</label><input id="setName" maxlength="40"></div>
+        <div class="fg">
+          <label>Уровень CEFR</label>
           <select id="setCefr">
             <option value="A1">A1 — Beginner</option>
             <option value="A2">A2 — Elementary</option>
             <option value="B1">B1 — Intermediate</option>
             <option value="B2">B2 — Upper-Intermediate</option>
             <option value="C1">C1 — Advanced</option>
-            <option value="C2">C2 — Mastery</option>
           </select>
         </div>
-        <div class="form-group">
+        <div class="fg">
           <label>Минут в день</label>
-          <select id="setMinutes">
-            <option value="30">30 минут</option>
-            <option value="45">45 минут</option>
-            <option value="60">60 минут</option>
+          <select id="setMins">
+            <option value="20">20 мин (минимум)</option>
+            <option value="30">30 мин</option>
+            <option value="45">45 мин</option>
+            <option value="60">60 мин</option>
           </select>
         </div>
-        <div class="form-group">
-          <label>Цель (зачем английский)</label>
-          <input type="text" id="setGoal" maxlength="120" placeholder="Travel, work, exams…">
-        </div>
-        <button class="btn btn-primary btn-block" onclick="saveProfile()">Сохранить профиль</button>
+        <div class="fg"><label>Цель</label><input id="setGoal" placeholder="Travel / work / exam…"></div>
+        <button class="btn btn-primary btn-block" onclick="saveProfile()">Сохранить</button>
       </div>
-
       <div class="card">
-        <h3 style="font-size:0.95rem;margin-bottom:10px">ИИ (Groq + Proxy)</h3>
-        <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:12px;line-height:1.45">
-          <strong>Просто скопируй и вставь</strong> из Supabase (как в LIFE RPG). Прямой gsk_ из браузера часто даёт Load failed.
-        </p>
-        <p id="aiStatus" style="font-size:0.85rem;color:var(--text-dim);margin-bottom:12px"></p>
-        <div class="form-group">
-          <label>1. Proxy URL (Edge Function)</label>
-          <input type="url" id="setProxyUrl" placeholder="https://xxxx.supabase.co/functions/v1/groq-proxy" autocomplete="off">
-        </div>
-        <div class="form-group">
-          <label>2. Anon / Publishable key</label>
-          <input type="text" id="setAnonKey" placeholder="sb_publishable_… или eyJ…" autocomplete="off">
-        </div>
-        <div class="form-group">
-          <label>Модель</label>
-          <select id="setModel">
-            <option value="openai/gpt-oss-20b">GPT-OSS 20B (быстро)</option>
-            <option value="openai/gpt-oss-120b">GPT-OSS 120B</option>
-            <option value="llama-3.1-8b-instant">Llama 3.1 8B</option>
-            <option value="llama-3.3-70b-versatile">Llama 3.3 70B</option>
-          </select>
-        </div>
-        <button class="btn btn-primary btn-block" onclick="saveAi()" style="margin-bottom:8px">Сохранить</button>
-        <button class="btn btn-secondary btn-block" onclick="testAi()">Проверить связь</button>
-        <p style="font-size:0.75rem;color:var(--text-muted);margin-top:12px;line-height:1.45">
-          URL: Edge Functions → groq-proxy → скопировать ссылку.<br>
-          Key: Settings → API Keys → Publishable (или legacy anon).
+        <h3 style="font-size:0.95rem;margin-bottom:8px">ИИ (Groq)</h3>
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:10px">Для диалога и правок. Proxy или ключ gsk_.</p>
+        <p id="aiStatus" style="font-size:0.8rem;color:var(--dim);margin-bottom:10px"></p>
+        <div class="fg"><label>Proxy URL (рекомендуется)</label>
+          <input id="setProxy" placeholder="https://….supabase.co/functions/v1/…"></div>
+        <div class="fg"><label>Anon key</label><input id="setAnon" placeholder="eyJ… / sb_publishable_…"></div>
+        <div class="fg"><label>Или ключ Groq</label><input type="password" id="setKey" placeholder="gsk_…"></div>
+        <button class="btn btn-primary btn-block" onclick="saveAi()" style="margin-bottom:8px">Сохранить ИИ</button>
+        <button class="btn btn-secondary btn-block" onclick="testAi()">Проверить</button>
+      </div>
+      <div class="card">
+        <h3 style="font-size:0.95rem;margin-bottom:8px">Метод</h3>
+        <p style="font-size:0.84rem;color:var(--muted);line-height:1.55">
+          Разговорный уровень (ориентир при 30–45 мин/день):<br>
+          <strong style="color:var(--text)">A1→A2</strong> ~ 2–4 мес · <strong style="color:var(--text)">A2→B1</strong> ~ 3–6 мес ·
+          <strong style="color:var(--text)">B1→B2</strong> ~ 4–8 мес.<br>
+          B1 — уже нормальный разговор в быту и в поездках. Секрет: <em>частое + говорить каждый день</em>.
         </p>
       </div>
-
-      <div class="card">
-        <button class="btn btn-secondary btn-block" onclick="exportData()" style="margin-bottom:8px">Экспорт сейва</button>
-        <button class="btn btn-secondary btn-block" onclick="if(confirm('Сбросить весь прогресс?'))resetAll()">Сброс</button>
-      </div>
+      <button class="btn btn-secondary btn-block" style="margin-bottom:8px" onclick="retakePlacement()">Пройти тест уровня заново</button>
+      <button class="btn btn-danger btn-block" onclick="resetAll()">Сбросить прогресс</button>
     </div>
   </div>
 
   <nav class="nav">
-    <button class="nav-btn active" data-screen="today"><span class="ico">☀</span><span>Сегодня</span></button>
-    <button class="nav-btn" data-screen="practice"><span class="ico">💬</span><span>Тьютор</span></button>
-    <button class="nav-btn" data-screen="skills"><span class="ico">◆</span><span>Навыки</span></button>
-    <button class="nav-btn" data-screen="log"><span class="ico">✎</span><span>Журнал</span></button>
-    <button class="nav-btn" data-screen="settings"><span class="ico">⚙</span><span>Ещё</span></button>
+    <button class="active" data-s="today" onclick="go('today')"><span class="ico">◎</span>Сегодня</button>
+    <button data-s="words" onclick="go('words')"><span class="ico">あ</span>Слова</button>
+    <button data-s="practice" onclick="go('practice')"><span class="ico">✎</span>Практика</button>
+    <button data-s="tutor" onclick="go('tutor')"><span class="ico">◎</span>Тьютор</button>
+    <button data-s="more" onclick="go('more')"><span class="ico">···</span>Ещё</button>
   </nav>
 
-  <script>
-  (function () {
-    const STORAGE = 'english_life_rpg_v1';
-    const SECRET = 'english_life_rpg_key';
-    const PROXY_LS = 'english_life_rpg_proxy';
-    const ANON_LS = 'english_life_rpg_anon';
-    // Можно оставить пустым — proxy вставляется в Ещё (скопировать/вставить).
-    const DEFAULT_PROXY_URL = '';
-    const DEFAULT_SUPABASE_ANON_KEY = '';
-    const GROQ_BASE = 'https://api.groq.com/openai/v1';
+  <div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
+    <div class="modal" id="modal"></div>
+  </div>
 
-    const SKILLS = [
-      { id: 'listening', name: 'Listening', ico: '🎧', tip: 'Подкасты, видео, диктанты' },
-      { id: 'speaking', name: 'Speaking', ico: '🗣', tip: 'Диалоги, shadowing, монологи' },
-      { id: 'reading', name: 'Reading', ico: '📖', tip: 'Статьи, stories, новости' },
-      { id: 'writing', name: 'Writing', ico: '✍️', tip: 'Сообщения, эссе, дневник' },
-      { id: 'vocab', name: 'Vocabulary', ico: '🔤', tip: 'Слова в контексте' },
-      { id: 'grammar', name: 'Grammar', ico: '📐', tip: 'Структуры и точность' }
-    ];
+<script>
+/* ========== ENCORE — efficient English learning ========== */
+const STORE = 'encore_v1';
+const SECRET = 'encore_key';
+const LS_PROXY = 'encore_proxy';
+const LS_ANON = 'encore_anon';
 
-    const CEFR_ORDER = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
+// Optional baked proxy (same pattern as LIFE RPG)
+const DEFAULT_PROXY_URL = '';
+const DEFAULT_SUPABASE_ANON_KEY = '';
+const GROQ_BASE = 'https://api.groq.com/openai/v1';
 
-    const DEFAULT_DAY = {
-      A1: [
-        { skill: 'vocab', title: 'Core words (10)', mins: 10, desc: 'Выучи 10 новых слов по теме дня. Запиши пример на каждое.' },
-        { skill: 'listening', title: 'Easy audio', mins: 10, desc: 'Слушай 1 короткий диалог (A1). Повтори вслух 3 фразы.' },
-        { skill: 'speaking', title: 'Self-intro drill', mins: 10, desc: 'Расскажи о себе 60 секунд на английском. Запиши голосом, если можешь.' }
-      ],
-      A2: [
-        { skill: 'vocab', title: 'Topic pack', mins: 10, desc: '10–12 слов по одной теме (еда / город / работа). 1 предложение на слово.' },
-        { skill: 'reading', title: 'Short text', mins: 15, desc: 'Прочитай короткий текст A2. Выпиши 5 незнакомых слов.' },
-        { skill: 'speaking', title: 'Describe your day', mins: 10, desc: 'Опиши свой день в 8–10 предложениях вслух.' },
-        { skill: 'grammar', title: 'Past Simple focus', mins: 10, desc: 'Сделай 8 предложений о вчерашнем дне в Past Simple.' }
-      ],
-      B1: [
-        { skill: 'listening', title: 'Podcast chunk', mins: 15, desc: '15 мин подкаста B1. Законспектируй 3 главные идеи.' },
-        { skill: 'vocab', title: 'Collocations', mins: 10, desc: '8 словосочетаний (make a decision, take a risk…). Примеры свои.' },
-        { skill: 'writing', title: 'Mini email', mins: 15, desc: 'Напиши email 80–120 слов на рабочую/учебную тему.' },
-        { skill: 'speaking', title: 'Opinion 2 min', mins: 10, desc: '2 минуты: мнение по любой новости. Без длинных пауз.' }
-      ],
-      B2: [
-        { skill: 'reading', title: 'Article deep-read', mins: 15, desc: 'Статья B2. 5 новых выражений + 3-sentence summary.' },
-        { skill: 'listening', title: 'Native speed', mins: 15, desc: 'Видео/подкаст ближе к native. Без субтитров 1-й раз, потом с.' },
-        { skill: 'writing', title: 'Argument paragraph', mins: 15, desc: 'Абзац 120–150 слов: claim → reason → example.' },
-        { skill: 'speaking', title: 'Role debate', mins: 10, desc: 'С ИИ-тьютором: спор на 1 тему, держи позицию 8–10 реплик.' }
-      ],
-      C1: [
-        { skill: 'listening', title: 'Lecture / interview', mins: 20, desc: '20 мин сложного аудирования. Notes + 5 advanced phrases.' },
-        { skill: 'writing', title: 'Structured response', mins: 20, desc: 'Письменный ответ 180–220 слов с linking devices.' },
-        { skill: 'speaking', title: 'Fluent monologue', mins: 15, desc: '3–4 минуты связной речи. Фокус: discourse markers.' },
-        { skill: 'grammar', title: 'Precision polish', mins: 10, desc: 'Возьми свой старый текст — улучши точность и стиль.' }
-      ],
-      C2: [
-        { skill: 'reading', title: 'Dense text', mins: 20, desc: 'Сложный текст (essay/analysis). Парафраз 1 абзаца.' },
-        { skill: 'writing', title: 'Style transfer', mins: 20, desc: 'Перепиши нейтральный текст в formal / persuasive tone.' },
-        { skill: 'speaking', title: 'Nuance talk', mins: 15, desc: 'Обсуди сложную тему с нюансами и оговорками (hedging).' }
-      ]
-    };
+const CEFR_ORDER = ['A1','A2','B1','B2','C1'];
 
-    let state = null;
-    let tutorMode = 'chat';
-    let chatBusy = false;
 
-    function uid() {
-      return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+/* Travel-first vocabulary (conversation for trips) */
+const TRAVEL_SEED = {
+  A1: [
+    ['passport','паспорт','My passport is in my bag.'],
+    ['ticket','билет','I have a ticket.'],
+    ['hotel','отель','Where is the hotel?'],
+    ['airport','аэропорт','The airport is far.'],
+    ['taxi','такси','I need a taxi.'],
+    ['bus','автобус','Which bus goes there?'],
+    ['train','поезд','The train leaves at 5.'],
+    ['map','карта','Can I see a map?'],
+    ['water','вода','A bottle of water, please.'],
+    ['food','еда','Where can I buy food?'],
+    ['help','помощь','I need help.'],
+    ['please','пожалуйста','Two tickets, please.'],
+    ['thank you','спасибо','Thank you very much.'],
+    ['sorry','извините','Sorry, I don\'t understand.'],
+    ['yes','да','Yes, please.'],
+    ['no','нет','No, thank you.'],
+    ['left','налево','Turn left.'],
+    ['right','направо','Turn right.'],
+    ['straight','прямо','Go straight.'],
+    ['near','рядом','Is it near?'],
+    ['far','далеко','How far is it?'],
+    ['open','открыто','Is it open?'],
+    ['closed','закрыто','It is closed.'],
+    ['today','сегодня','Today I travel.'],
+    ['tomorrow','завтра','Tomorrow I leave.'],
+    ['now','сейчас','I need it now.'],
+    ['here','здесь','I am here.'],
+    ['there','там','Go there.'],
+    ['how much','сколько стоит','How much is it?'],
+    ['where','где','Where is the station?']
+  ],
+  A2: [
+    ['reservation','бронь','I have a reservation.'],
+    ['check-in','регистрация','Where is check-in?'],
+    ['luggage','багаж','My luggage is heavy.'],
+    ['gate','выход на посадку','Which gate?'],
+    ['delay','задержка','The flight is delayed.'],
+    ['platform','платформа','Platform 3.'],
+    ['reception','ресепшен','Go to reception.'],
+    ['key card','ключ-карта','Here is your key card.'],
+    ['wifi','вайфай','What is the wifi password?'],
+    ['bill','счёт','Can I have the bill?'],
+    ['cash','наличные','Do you take cash?'],
+    ['card','карта (оплата)','I pay by card.'],
+    ['exchange','обмен','Currency exchange'],
+    ['pharmacy','аптека','Is there a pharmacy nearby?'],
+    ['museum','музей','Tickets for the museum.'],
+    ['entrance','вход','Where is the entrance?'],
+    ['exit','выход','Emergency exit'],
+    ['recommend','рекомендовать','What do you recommend?'],
+    ['allergic','аллергия','I am allergic to nuts.'],
+    ['vegetarian','вегетарианец','A vegetarian meal, please.'],
+    ['spicy','острый','Not too spicy, please.'],
+    ['booking','бронирование','I made a booking online.'],
+    ['cancel','отменить','I need to cancel.'],
+    ['refund','возврат','Can I get a refund?'],
+    ['lost','потерянный','I lost my phone.'],
+    ['found','нашёл','I found this bag.'],
+    ['emergency','чрезвычайная ситуация','This is an emergency.'],
+    ['police','полиция','Call the police.'],
+    ['hospital','больница','Where is the hospital?'],
+    ['comfortable','удобный','Is the room comfortable?']
+  ],
+  B1: [
+    ['itinerary','маршрут поездки','Here is my itinerary.'],
+    ['layover','пересадка','I have a two-hour layover.'],
+    ['boarding pass','посадочный талон','Show your boarding pass.'],
+    ['customs','таможня','Go through customs.'],
+    ['declare','декларировать','Nothing to declare.'],
+    ['sightseeing','осмотр достопримечательностей','I love sightseeing.'],
+    ['local','местный','Ask a local for advice.'],
+    ['crowd','толпа','Avoid the crowd.'],
+    ['queue','очередь','There is a long queue.'],
+    ['appointment','запись','I have an appointment.'],
+    ['complaint','жалоба','I would like to make a complaint.'],
+    ['overbooked','перебронь','The flight is overbooked.'],
+    ['upgrade','апгрейд','Can I upgrade my seat?'],
+    ['connection','стыковка','I missed my connection.'],
+    ['jet lag','джетлаг','I have jet lag.'],
+    ['souvenir','сувенир','I bought a souvenir.'],
+    ['bargain','торговаться / выгодная покупка','You can bargain here.'],
+    ['scam','мошенничество','Be careful of scams.'],
+    ['insurance','страховка','Travel insurance is important.'],
+    ['embassy','посольство','Contact the embassy.']
+  ],
+  B2: [
+    ['reimburse','возмещать','Will you reimburse the cost?'],
+    ['accommodate','разместить / учесть','We can accommodate your request.'],
+    ['inconvenience','неудобство','Sorry for the inconvenience.'],
+    ['itinerary change','изменение маршрута','There was an itinerary change.'],
+    ['peak season','высокий сезон','Avoid peak season if possible.'],
+    ['off the beaten path','нетуристическое место','Try somewhere off the beaten path.'],
+    ['cultural etiquette','культурный этикет','Learn basic cultural etiquette.'],
+    ['transit visa','транзитная виза','Do I need a transit visa?'],
+    ['travel advisory','рекомендации для поездок','Check the travel advisory.'],
+    ['hospitality','гостеприимство','Thank you for your hospitality.']
+  ],
+  C1: [
+    ['logistics','логистика','The logistics were complicated.'],
+    ['contingency','запасной план','We need a contingency plan.'],
+    ['unprecedented','беспрецедентный','Unprecedented delays'],
+    ['diplomatically','дипломатично','Handle it diplomatically.']
+  ]
+};
+
+const TRAVEL_PATTERNS = {
+  A1: [
+    { en: 'Where is the …?', ru: 'Где …?', ex: 'Where is the bathroom?' },
+    { en: 'How much is …?', ru: 'Сколько стоит …?', ex: 'How much is a ticket?' },
+    { en: 'I would like … / I\'d like …', ru: 'Я бы хотел …', ex: 'I\'d like a coffee, please.' },
+    { en: 'Do you speak English?', ru: 'Вы говорите по-английски?', ex: 'Excuse me, do you speak English?' },
+    { en: 'I don\'t understand.', ru: 'Я не понимаю.', ex: 'Sorry, I don\'t understand.' },
+    { en: 'Can you help me?', ru: 'Можете помочь?', ex: 'Can you help me, please?' },
+    { en: 'I need …', ru: 'Мне нужно …', ex: 'I need a taxi.' },
+    { en: 'My name is …', ru: 'Меня зовут …', ex: 'My name is Alex.' }
+  ],
+  A2: [
+    { en: 'Could you repeat that, please?', ru: 'Повторите, пожалуйста.', ex: 'Could you repeat that slowly?' },
+    { en: 'I have a reservation under …', ru: 'Бронь на имя …', ex: 'I have a reservation under Ivanov.' },
+    { en: 'How do I get to …?', ru: 'Как пройти / доехать до …?', ex: 'How do I get to the museum?' },
+    { en: 'Is there a … nearby?', ru: 'Есть ли … рядом?', ex: 'Is there a pharmacy nearby?' },
+    { en: 'What time does it open/close?', ru: 'Во сколько открывается / закрывается?', ex: 'What time does the train leave?' },
+    { en: 'I\'m looking for …', ru: 'Я ищу …', ex: 'I\'m looking for platform 4.' },
+    { en: 'Can I pay by card?', ru: 'Можно картой?', ex: 'Can I pay by card?' },
+    { en: 'It\'s too expensive.', ru: 'Слишком дорого.', ex: 'Sorry, it\'s too expensive for me.' }
+  ],
+  B1: [
+    { en: 'I\'m allergic to …', ru: 'У меня аллергия на …', ex: 'I\'m allergic to peanuts.' },
+    { en: 'There seems to be a problem with …', ru: 'Похоже, проблема с …', ex: 'There seems to be a problem with my booking.' },
+    { en: 'Could you recommend a good …?', ru: 'Можете посоветовать хороший …?', ex: 'Could you recommend a good local restaurant?' },
+    { en: 'I missed my connection. What should I do?', ru: 'Я пропустил пересадку. Что делать?', ex: 'I missed my connection. What should I do?' },
+    { en: 'Is this seat taken?', ru: 'Это место занято?', ex: 'Excuse me, is this seat taken?' },
+    { en: 'I\'d like to change my booking.', ru: 'Хочу изменить бронь.', ex: 'I\'d like to change my booking to Friday.' }
+  ],
+  B2: [
+    { en: 'I appreciate your help, but I need to speak to a manager.', ru: 'Спасибо, но мне нужен менеджер.', ex: 'I appreciate your help, but I need to speak to a manager.' },
+    { en: 'According to my itinerary …', ru: 'Согласно моему маршруту …', ex: 'According to my itinerary, we arrive at 9.' },
+    { en: 'Is there any chance of a refund?', ru: 'Есть ли шанс на возврат?', ex: 'Is there any chance of a refund for the cancelled tour?' },
+    { en: 'I\'d prefer something a bit quieter / cheaper.', ru: 'Предпочёл бы тише / дешевле.', ex: 'I\'d prefer something a bit quieter if possible.' }
+  ],
+  C1: [
+    { en: 'Would it be possible to arrange an alternative?', ru: 'Можно ли организовать альтернативу?', ex: 'Would it be possible to arrange an alternative transfer?' },
+    { en: 'I understand the constraints; however …', ru: 'Понимаю ограничения, однако…', ex: 'I understand the constraints; however, I need a solution today.' }
+  ]
+};
+
+const TRAVEL_SCENES = {
+  A1: [
+    'Airport help desk: ask where the exit and taxis are.',
+    'Hotel reception: say your name and ask for your room.',
+    'Café: order water and a sandwich, ask the price.'
+  ],
+  A2: [
+    'You are lost. Ask a stranger how to get to the train station.',
+    'Hotel check-in: reservation name, nights, wifi password.',
+    'Restaurant: order food, say you don\'t want spicy, ask for the bill.'
+  ],
+  B1: [
+    'Flight delayed: ask about the new time and meal vouchers.',
+    'Wrong room at hotel: politely explain and ask to change.',
+    'Buy tickets: ask about price, student discount, and return trip.'
+  ],
+  B2: [
+    'Missed connection: negotiate rebooking with airline staff.',
+    'Complaint about noisy room: request move or partial refund.',
+    'Ask a local for non-tourist restaurant recommendations and directions.'
+  ],
+  C1: [
+    'Dispute a charge with calm, precise language at reception.',
+    'Explain a complex itinerary change and confirm next steps.'
+  ]
+};
+
+const TRAVEL_WRITING = {
+  A1: ['Write 4 sentences about your next trip (where, when, with whom).', 'Describe your hotel room in simple sentences.'],
+  A2: ['Write a short message to a hotel: booking dates and one question.', 'Describe how you get from the airport to the city.'],
+  B1: ['Write a polite complaint about a delayed train (5–7 sentences).', 'Email a host: thank them and ask about check-in time.'],
+  B2: ['Write a review of a hotel stay (pros, cons, recommendation).', 'Explain why travel insurance matters (short paragraph).'],
+  C1: ['Argue how to travel more sustainably without sounding preachy.']
+};
+
+
+/* High-frequency seed vocabulary by level (EN → RU + example) */
+const SEED = {
+  A1: [
+    ['I','я','I am a student.'],['you','ты / вы','How are you?'],['the','определённый артикль','The book is here.'],
+    ['be','быть','She is happy.'],['to','к / чтобы','I go to school.'],['and','и','You and I'],
+    ['a','неопределённый артикль','A cat'],['in','в','in the room'],['have','иметь','I have a pen.'],
+    ['it','это / оно','It is cold.'],['for','для / в течение','for you'],['not','не','I am not tired.'],
+    ['on','на','on the table'],['with','с','with friends'],['he','он','He works.'],
+    ['she','она','She reads.'],['do','делать','Do you like tea?'],['at','у / в','at home'],
+    ['this','это','This is my bag.'],['but','но','I want to, but I can\'t.'],
+    ['from','из / от','from Russia'],['by','у / к','by bus'],['we','мы','We live here.'],
+    ['say','говорить','They say hello.'],['go','идти / ехать','Go home.'],['can','мочь','I can swim.'],
+    ['want','хотеть','I want water.'],['like','нравиться','I like music.'],['time','время','What time is it?'],
+    ['day','день','Have a nice day.'],['good','хороший','Good morning.'],['new','новый','a new phone'],
+    ['work','работа / работать','I work at 9.'],['people','люди','Many people'],['year','год','this year'],
+    ['know','знать','I know him.'],['take','брать','Take a seat.'],['see','видеть','See you later.'],
+    ['come','приходить','Come in.'],['think','думать','I think so.']
+  ],
+  A2: [
+    ['because','потому что','I stay because it rains.'],['should','следует','You should rest.'],
+    ['could','мог / мог бы','Could you help?'],['would','бы','I would like coffee.'],
+    ['about','о / около','about the plan'],['through','через','through the park'],
+    ['still','всё ещё','I still study.'],['already','уже','I already ate.'],
+    ['enough','достаточно','enough time'],['almost','почти','almost done'],
+    ['usually','обычно','I usually wake up early.'],['often','часто','We often meet.'],
+    ['never','никогда','I never smoke.'],['always','всегда','She always smiles.'],
+    ['during','во время','during the lesson'],['while','пока / в то время как','while waiting'],
+    ['before','до','before dinner'],['after','после','after work'],['without','без','without sugar'],
+    ['between','между','between us'],['problem','проблема','No problem.'],['idea','идея','Good idea!'],
+    ['important','важный','This is important.'],['different','другой / разный','different cities'],
+    ['possible','возможный','Is it possible?'],['experience','опыт','work experience'],
+    ['change','менять / изменение','Change the plan.'],['decide','решать','I decided to go.'],
+    ['agree','соглашаться','I agree with you.'],['explain','объяснять','Can you explain?'],
+    ['remember','помнить','I remember that day.'],['forget','забывать','Don\'t forget.'],
+    ['prefer','предпочитать','I prefer tea.'],['suggest','предлагать','I suggest we wait.'],
+    ['improve','улучшать','Improve your English.'],['practice','практика / практиковать','Practice daily.'],
+    ['travel','путешествовать','I love to travel.'],['health','здоровье','Good health'],
+    ['money','деньги','Save money.'],['family','семья','My family'],['friend','друг','Best friend']
+  ],
+  B1: [
+    ['although','хотя','Although it rained, we went out.'],['however','однако','However, I disagree.'],
+    ['therefore','поэтому','Therefore we left.'],['whether','ли','I don\'t know whether he\'ll come.'],
+    ['unless','если не','Unless you hurry, we\'ll be late.'],['despite','несмотря на','despite the noise'],
+    ['according to','согласно','according to the report'],['in order to','для того чтобы','in order to learn'],
+    ['as soon as','как только','as soon as possible'],['as long as','пока / если','as long as you try'],
+    ['realize','осознавать','I realized my mistake.'],['consider','рассматривать','Consider this option.'],
+    ['achieve','достигать','Achieve your goals.'],['maintain','поддерживать','Maintain focus.'],
+    ['require','требовать','This requires practice.'],['provide','предоставлять','Provide examples.'],
+    ['affect','влиять','It affects sleep.'],['involve','включать / вовлекать','It involves risk.'],
+    ['develop','развивать','Develop a habit.'],['support','поддерживать','I support you.'],
+    ['challenge','вызов','a real challenge'],['opportunity','возможность','a great opportunity'],
+    ['environment','окружение / среда','work environment'],['relationship','отношения','a close relationship'],
+    ['responsibility','ответственность','Take responsibility.'],['confidence','уверенность','Build confidence.'],
+    ['efficient','эффективный','an efficient method'],['reliable','надёжный','a reliable source'],
+    ['available','доступный','Is it available?'],['appropriate','подходящий','appropriate language'],
+    ['significant','значительный','a significant change'],['essential','необходимый','Essential skills'],
+    ['tend to','иметь склонность','I tend to overthink.'],['end up','в итоге оказаться','We ended up staying.'],
+    ['figure out','разобраться','Figure it out.'],['point out','указывать','He pointed out the error.'],
+    ['carry on','продолжать','Carry on working.'],['give up','сдаваться','Don\'t give up.'],
+    ['look forward to','ждать с нетерпением','I look forward to meeting you.']
+  ],
+  B2: [
+    ['nevertheless','тем не менее','Nevertheless, we continued.'],
+    ['furthermore','кроме того','Furthermore, costs rose.'],
+    ['whereas','тогда как','I prefer tea, whereas she likes coffee.'],
+    ['whereby','посредством чего','a system whereby users vote'],
+    ['comprehensive','всеобъемлющий','a comprehensive guide'],
+    ['substantial','существенный','substantial progress'],
+    ['inevitable','неизбежный','Change is inevitable.'],
+    ['plausible','правдоподобный','a plausible explanation'],
+    ['ambiguous','двусмысленный','an ambiguous message'],
+    ['nuance','нюанс','Understand the nuance.'],
+    ['perspective','точка зрения','from my perspective'],
+    ['implication','следствие / намёк','serious implications'],
+    ['assumption','предположение','a false assumption'],
+    ['framework','рамки / структура','a useful framework'],
+    ['outcome','результат','a positive outcome'],
+    ['trade-off','компромисс','a difficult trade-off'],
+    ['leverage','использовать как рычаг','Leverage your skills.'],
+    ['prioritize','расставлять приоритеты','Prioritize sleep.'],
+    ['articulate','чётко выражать','Articulate your idea.'],
+    ['negotiate','вести переговоры','Negotiate the terms.']
+  ],
+  C1: [
+    ['notwithstanding','несмотря на','Notwithstanding the risks…'],
+    ['albeit','хотя и','albeit slowly'],
+    ['heretofore','до сих пор (форм.)','heretofore unknown'],
+    ['juxtapose','сопоставлять','Juxtapose the two theories.'],
+    ['ephemeral','эфемерный','ephemeral trends'],
+    ['ubiquitous','вездесущий','Smartphones are ubiquitous.'],
+    ['pragmatic','прагматичный','a pragmatic approach'],
+    ['scrutinize','тщательно изучать','Scrutinize the data.'],
+    ['mitigate','смягчать','Mitigate the risk.'],
+    ['underscore','подчёркивать','This underscores the need.']
+  ]
+};
+
+const PATTERNS = {
+  A1: [
+    { en: 'I am / I\'m …', ru: 'Я — …', ex: 'I\'m a builder. I\'m tired.' },
+    { en: 'I have …', ru: 'У меня есть …', ex: 'I have a question.' },
+    { en: 'I like / I don\'t like …', ru: 'Мне нравится / не нравится', ex: 'I like coffee.' },
+    { en: 'There is / There are …', ru: 'Есть / имеется', ex: 'There is a book on the table.' },
+    { en: 'Can you …?', ru: 'Можешь …?', ex: 'Can you help me?' },
+    { en: 'Where is …?', ru: 'Где …?', ex: 'Where is the station?' }
+  ],
+  A2: [
+    { en: 'I used to …', ru: 'Раньше я …', ex: 'I used to live in Moscow.' },
+    { en: 'I\'m going to …', ru: 'Я собираюсь …', ex: 'I\'m going to study tonight.' },
+    { en: 'Could you …, please?', ru: 'Не могли бы вы …', ex: 'Could you repeat that, please?' },
+    { en: 'What do you think about …?', ru: 'Что думаешь о …?', ex: 'What do you think about this plan?' },
+    { en: 'It depends on …', ru: 'Это зависит от …', ex: 'It depends on the weather.' },
+    { en: 'I\'d rather …', ru: 'Я бы предпочёл …', ex: 'I\'d rather stay home.' }
+  ],
+  B1: [
+    { en: 'The point is that …', ru: 'Суть в том, что …', ex: 'The point is that we need more time.' },
+    { en: 'As far as I know …', ru: 'Насколько я знаю …', ex: 'As far as I know, he left.' },
+    { en: 'I\'m not sure whether …', ru: 'Не уверен, … ли', ex: 'I\'m not sure whether this is correct.' },
+    { en: 'What I mean is …', ru: 'Я имею в виду …', ex: 'What I mean is we should wait.' },
+    { en: 'On the one hand … on the other hand …', ru: 'С одной стороны… с другой…', ex: 'On the one hand it\'s cheap; on the other, low quality.' },
+    { en: 'It turns out that …', ru: 'Оказывается, что …', ex: 'It turns out that he was right.' }
+  ],
+  B2: [
+    { en: 'Having said that, …', ru: 'При этом / тем не менее…', ex: 'It\'s difficult. Having said that, it\'s worth it.' },
+    { en: 'To put it another way, …', ru: 'Иначе говоря…', ex: 'To put it another way, we failed the test.' },
+    { en: 'I take your point, but …', ru: 'Понимаю вашу мысль, но…', ex: 'I take your point, but the data says otherwise.' },
+    { en: 'In terms of …', ru: 'С точки зрения …', ex: 'In terms of cost, this is better.' },
+    { en: 'Broadly speaking, …', ru: 'В целом…', ex: 'Broadly speaking, the plan works.' }
+  ],
+  C1: [
+    { en: 'Be that as it may, …', ru: 'Как бы то ни было…', ex: 'Be that as it may, we must decide.' },
+    { en: 'It is worth noting that …', ru: 'Стоит отметить, что…', ex: 'It is worth noting that results vary.' },
+    { en: 'To a large extent, …', ru: 'В значительной степени…', ex: 'To a large extent, success depends on habits.' }
+  ]
+};
+
+const GRAMMAR = {
+  A1: [
+    { t: 'Present Simple', body: 'Факты и привычки: I work / she works. Отрицание: don\'t / doesn\'t. Вопрос: Do/Does + subject.\n\nExamples:\n• I study every day.\n• She doesn\'t drink coffee.\n• Do you live here?' },
+    { t: 'to be (am/is/are)', body: 'I am, you/we/they are, he/she/it is.\n\n• I\'m a student.\n• They aren\'t ready.\n• Is he at home?' }
+  ],
+  A2: [
+    { t: 'Past Simple', body: 'Завершённое в прошлом. Правильные: +ed. Неправильные — таблица (go→went).\n\n• I watched a film yesterday.\n• She went to Spain.\n• Did you call him? — No, I didn\'t.' },
+    { t: 'Present Continuous', body: 'Сейчас / временная ситуация: am/is/are + V-ing.\n\n• I\'m reading now.\n• They aren\'t working today.' },
+    { t: 'going to vs will', body: 'going to — план/намерение. will — решение в момент речи / прогноз.\n\n• I\'m going to start tomorrow. (plan)\n• I\'ll help you. (decision now)' }
+  ],
+  B1: [
+    { t: 'Present Perfect', body: 'Связь прошлого с настоящим: have/has + V3. Often with ever, never, already, yet, for, since.\n\n• I have lived here for 3 years.\n• Have you ever been to London?\n• She hasn\'t finished yet.' },
+    { t: '1st Conditional', body: 'If + Present, will + V. Реальное будущее.\n\n• If it rains, we\'ll stay home.\n• If you practice, you\'ll improve.' },
+    { t: 'Modal verbs (should/must/might)', body: 'should — совет. must — обязанность/уверенность. might — возможность.\n\n• You should sleep more.\n• You must wear a helmet.\n• It might rain.' }
+  ],
+  B2: [
+    { t: 'Passive Voice', body: 'Object + be + V3. Фокус на действии, не на деятеле.\n\n• The house was built in 1990.\n• English is spoken here.\n• The report will be finished tomorrow.' },
+    { t: 'Relative clauses', body: 'who (people), which (things), that (both), where (places).\n\n• The man who called is my boss.\n• A book that changed my life.' },
+    { t: '2nd Conditional', body: 'If + Past, would + V. Гипотеза.\n\n• If I had more time, I would travel.\n• If I were you, I\'d start today.' }
+  ],
+  C1: [
+    { t: 'Inversion for emphasis', body: 'Rarely / Never / Not only + auxiliary + subject.\n\n• Rarely have I seen such progress.\n• Not only did he pass, but he also got top marks.' },
+    { t: 'Cleft sentences', body: 'It is/was … that/who — выделение.\n\n• It was the daily practice that helped most.\n• What I need is feedback.' }
+  ]
+};
+
+const WRITING_PROMPTS = {
+  A1: ['Describe your typical day in 5 sentences.', 'Write about your family or friends.', 'What do you like and dislike?'],
+  A2: ['Describe your last weekend.', 'Write about a place you want to visit and why.', 'What is your job or studies like?'],
+  B1: ['Describe a challenge you overcame.', 'Should people learn languages? Give 2 reasons.', 'Your plans for the next year.'],
+  B2: ['Discuss pros and cons of remote work.', 'Describe a book or film that influenced you.', 'How technology changes learning.'],
+  C1: ['Argue for or against standardized testing.', 'Reflect on a decision that shaped your path.', 'How culture affects communication style.']
+};
+
+const DIALOGUE_SCENES = {
+  A1: ['You meet a new classmate. Introduce yourself and ask 3 simple questions.', 'At a café: order a drink and ask the price.'],
+  A2: ['You are lost in a city. Ask for directions and check understanding.', 'Phone a hotel: ask about room price and breakfast.'],
+  B1: ['Job small talk: talk about your studies/work and weekend plans.', 'Disagree politely with a friend about a film.'],
+  B2: ['Negotiate a deadline with a colleague.', 'Discuss a news topic and give your opinion with reasons.'],
+  C1: ['Defend a controversial opinion in a polite debate.', 'Mentor a junior: give structured career advice.']
+};
+
+/* ---------- state ---------- */
+let S = {
+  name: 'Learner',
+  cefr: 'A2',
+  minutes: 30,
+  goal: 'Conversational English',
+  streak: { n: 0, last: null },
+  today: { date: null, mins: 0, steps: {} },
+  words: [], // {id, en, ru, ex, ef, due, reps, lapses}
+  chat: [],
+  stats: { sessions: 0, reviews: 0, written: 0 }
+};
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function today() { return new Date().toISOString().slice(0, 10); }
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORE);
+    if (raw) {
+      const d = JSON.parse(raw);
+      Object.assign(S, d);
+      if (!S.today) S.today = { date: null, mins: 0, steps: {} };
+      if (!S.streak) S.streak = { n: 0, last: null };
+      if (!Array.isArray(S.words)) S.words = [];
+      if (!Array.isArray(S.chat)) S.chat = [];
     }
+  } catch (e) {}
+  ensureToday();
+}
 
-    function todayKey() {
-      const d = new Date();
-      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
-    }
+function save() {
+  try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {}
+}
 
-    function defaultState() {
-      return {
-        name: 'Learner',
-        cefr: 'A2',
-        minutesTarget: 30,
-        goal: '',
-        xp: 0,
-        streak: 0,
-        lastActiveDay: null,
-        skills: Object.fromEntries(SKILLS.map(s => [s.id, { xp: 0, level: 1 }])),
-        dayPlan: [],
-        dayKey: null,
-        log: [],
-        chat: [],
-        ai: { base: GROQ_BASE, model: 'openai/gpt-oss-20b' }
-      };
-    }
-
-    function load() {
-      try {
-        const raw = localStorage.getItem(STORAGE);
-        if (raw) {
-          state = Object.assign(defaultState(), JSON.parse(raw));
-          if (!state.skills) state.skills = defaultState().skills;
-          if (!state.ai) state.ai = defaultState().ai;
-        } else state = defaultState();
-      } catch (e) {
-        state = defaultState();
-      }
-      ensureDayPlan();
-      updateStreakOnLoad();
-    }
-
-    function save() {
-      try {
-        localStorage.setItem(STORAGE, JSON.stringify(state));
-      } catch (e) {}
-    }
-
-    function getApiKey() {
-      try { return localStorage.getItem(SECRET) || ''; } catch (e) { return ''; }
-    }
-    function setApiKey(k) {
-      try {
-        if (k) localStorage.setItem(SECRET, k);
-        else localStorage.removeItem(SECRET);
-      } catch (e) {}
-    }
-
-    function getProxyUrl() {
-      try {
-        const u = (localStorage.getItem(PROXY_LS) || DEFAULT_PROXY_URL || '').trim();
-        return u.replace(/\/$/, '');
-      } catch (e) {
-        return (DEFAULT_PROXY_URL || '').trim().replace(/\/$/, '');
-      }
-    }
-
-    function setProxyUrl(u) {
-      try {
-        u = (u || '').trim().replace(/\/$/, '');
-        if (u) localStorage.setItem(PROXY_LS, u);
-        else localStorage.removeItem(PROXY_LS);
-      } catch (e) {}
-    }
-
-    function getAnonKey() {
-      try {
-        return (localStorage.getItem(ANON_LS) || DEFAULT_SUPABASE_ANON_KEY || '').trim();
-      } catch (e) {
-        return (DEFAULT_SUPABASE_ANON_KEY || '').trim();
-      }
-    }
-
-    function setAnonKey(k) {
-      try {
-        k = (k || '').trim();
-        if (k) localStorage.setItem(ANON_LS, k);
-        else localStorage.removeItem(ANON_LS);
-      } catch (e) {}
-    }
-
-    function hasAi() {
-      return !!(getProxyUrl() || getApiKey());
-    }
-
-    function toast(msg, type) {
-      const el = document.createElement('div');
-      el.className = 'toast ' + (type === 'ok' ? 'ok' : type === 'err' ? 'err' : '');
-      el.textContent = msg;
-      document.getElementById('toasts').appendChild(el);
-      setTimeout(() => el.remove(), 3200);
-    }
-
-    function levelFromXp(xp) {
-      return Math.min(99, 1 + Math.floor(Math.sqrt(xp / 40)));
-    }
-
-    function xpInLevel(xp) {
-      const lvl = levelFromXp(xp);
-      const prev = Math.pow(lvl - 1, 2) * 40;
-      const next = Math.pow(lvl, 2) * 40;
-      return { level: lvl, current: xp - prev, needed: next - prev, percent: Math.min(100, ((xp - prev) / (next - prev)) * 100) };
-    }
-
-    function updateStreakOnLoad() {
-      const t = todayKey();
-      if (!state.lastActiveDay) return;
-      const last = new Date(state.lastActiveDay + 'T12:00:00');
+function ensureToday() {
+  const t = today();
+  if (S.today.date !== t) {
+    // streak
+    if (S.today.date) {
+      const prev = new Date(S.today.date + 'T12:00:00');
       const now = new Date(t + 'T12:00:00');
-      const diff = Math.round((now - last) / 86400000);
-      if (diff > 1) state.streak = 0;
+      const diff = Math.round((now - prev) / 86400000);
+      if (diff === 1 && S.today.mins > 0) S.streak.n = (S.streak.n || 0) + 1;
+      else if (diff > 1) S.streak.n = 0;
     }
+    S.today = { date: t, mins: 0, steps: {} };
+    save();
+  }
+}
 
-    function markActiveToday() {
-      const t = todayKey();
-      if (state.lastActiveDay !== t) {
-        if (state.lastActiveDay) {
-          const last = new Date(state.lastActiveDay + 'T12:00:00');
-          const now = new Date(t + 'T12:00:00');
-          const diff = Math.round((now - last) / 86400000);
-          state.streak = diff === 1 ? (state.streak || 0) + 1 : 1;
-        } else state.streak = 1;
-        state.lastActiveDay = t;
-      }
-    }
+function toast(msg, type) {
+  const el = document.createElement('div');
+  el.className = 'toast ' + (type || '');
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2400);
+}
 
-    function ensureDayPlan() {
-      const t = todayKey();
-      if (state.dayKey === t && state.dayPlan && state.dayPlan.length) return;
-      const pack = DEFAULT_DAY[state.cefr] || DEFAULT_DAY.A2;
-      let mins = 0;
-      const target = state.minutesTarget || 30;
-      const plan = [];
-      for (const q of pack) {
-        if (mins >= target && plan.length >= 2) break;
-        plan.push({
-          id: uid(),
-          title: q.title,
-          skill: q.skill,
-          mins: q.mins,
-          desc: q.desc,
-          done: false,
-          xp: Math.round(q.mins * 3.5)
-        });
-        mins += q.mins;
+function go(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('sc-' + name).classList.add('active');
+  document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('active', b.dataset.s === name));
+  if (name === 'today') renderToday();
+  if (name === 'words') renderWords();
+  if (name === 'tutor') renderChat();
+  if (name === 'more') fillMore();
+}
+
+function openModal(html) {
+  document.getElementById('modal').innerHTML = html;
+  document.getElementById('modalBg').classList.add('open');
+}
+function closeModal() { document.getElementById('modalBg').classList.remove('open'); }
+
+
+/* ---------- Placement & onboard (travel) ---------- */
+const PLACE_Q = [
+  // A1
+  { q: '«Меня зовут Анна» по-английски:', options: ['I name Anna', 'My name is Anna', 'I am name Anna', 'Name my Anna'], a: 1, lvl: 'A1' },
+  { q: 'Выбери вопрос о месте:', options: ['What time is it?', 'Where is the station?', 'How old are you?', 'Who are you?'], a: 1, lvl: 'A1' },
+  { q: 'He ___ a teacher.', options: ['am', 'is', 'are', 'be'], a: 1, lvl: 'A1' },
+  // A2
+  { q: 'Yesterday I ___ home early.', options: ['go', 'goed', 'went', 'goes'], a: 2, lvl: 'A2' },
+  { q: 'I ___ coffee every morning.', options: ['drinks', 'drink', 'drinking', 'drank'], a: 1, lvl: 'A2' },
+  { q: '«Я не умею плавать»:', options: ['I not can swim', 'I can\'t swim', 'I don\'t can swim', 'I no swim'], a: 1, lvl: 'A2' },
+  { q: 'There ___ two bags on the table.', options: ['is', 'are', 'be', 'have'], a: 1, lvl: 'A2' },
+  // B1
+  { q: 'I ___ here since 2020.', options: ['live', 'lived', 'have lived', 'am living'], a: 2, lvl: 'B1' },
+  { q: 'If it rains tomorrow, we ___ at home.', options: ['stay', 'will stay', 'would stay', 'stayed'], a: 1, lvl: 'B1' },
+  { q: 'She asked me where I ___.', options: ['live', 'lived', 'am live', 'lives'], a: 1, lvl: 'B1' },
+  { q: 'Choose the natural line:', options: ['I am agree with you', 'I agree with you', 'I am agree you', 'I agreeing'], a: 1, lvl: 'B1' },
+  // B2
+  { q: 'The report ___ by the team last week.', options: ['wrote', 'was written', 'has write', 'was wrote'], a: 1, lvl: 'B2' },
+  { q: 'I wish I ___ more time now.', options: ['have', 'had', 'would have', 'am having'], a: 1, lvl: 'B2' },
+  { q: 'Best formal phrase:', options: ['Give me refund!', 'I want money', 'I\'d like to request a refund', 'Refund me ASAP bro'], a: 2, lvl: 'B2' },
+  { q: 'Despite ___ tired, she finished the work.', options: ['she was', 'being', 'to be', 'she is'], a: 1, lvl: 'B2' }
+];
+
+function needsOnboard() {
+  try { return !localStorage.getItem('encore_onboarded'); } catch (e) { return true; }
+}
+
+function showOnboard() {
+  const el = document.getElementById('onboard');
+  const inner = document.getElementById('onboardInner');
+  el.classList.remove('hidden');
+  let step = 0; // 0 intro, 1 place, 2 result
+  let answers = [];
+  let qi = 0;
+
+  const renderIntro = () => {
+    inner.innerHTML = `
+      <h1 style="margin-bottom:8px">ENCORE · Conversation</h1>
+      <p style="color:var(--muted);margin-bottom:16px;line-height:1.55">
+        Цель — <strong style="color:var(--text)">хороший разговорный английский</strong>:
+        понимать и отвечать в живой речи. Путешествия — одна из тем на будущее, не единственная.
+      </p>
+      <div class="tip">
+        <strong>Как быстрее заговорить</strong><br>
+        1) Частые слова + готовые фразы<br>
+        2) SRS каждый день (не забывать)<br>
+        3) Диалог и короткие тексты — главный рычаг<br>
+        Реализм: уверенный разговорный B1 ≈ <strong>4–8 месяцев</strong> с A1 при 30–45 мин/день.
+      </div>
+      <div class="fg"><label>Как тебя зовут?</label><input id="obName" value="${esc(S.name || '')}" placeholder="Имя"></div>
+      <div class="fg"><label>Минут в день</label>
+        <select id="obMins">
+          <option value="20">20</option>
+          <option value="30" selected>30</option>
+          <option value="45">45</option>
+          <option value="60">60</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="window.__obNext()">Определить уровень →</button>
+    `;
+    window.__obNext = () => {
+      S.name = document.getElementById('obName').value.trim() || 'Traveller';
+      S.minutes = parseInt(document.getElementById('obMins').value, 10) || 30;
+      S.goal = 'Conversational English';
+      step = 1; qi = 0; answers = [];
+      renderQ();
+    };
+  };
+
+  const renderQ = () => {
+    if (qi >= PLACE_Q.length) { finishPlace(); return; }
+    const item = PLACE_Q[qi];
+    inner.innerHTML = `
+      <p style="font-size:0.8rem;color:var(--dim);margin-bottom:8px">Вопрос ${qi + 1} / ${PLACE_Q.length}</p>
+      <h2 style="font-size:1.1rem;margin-bottom:16px">${esc(item.q)}</h2>
+      ${item.options.map((o, i) => `
+        <button class="btn btn-secondary btn-block" style="margin-bottom:8px;justify-content:flex-start;text-align:left"
+          onclick="window.__obAns(${i})">${esc(o)}</button>
+      `).join('')}
+    `;
+    window.__obAns = (i) => { answers.push(i); qi++; renderQ(); };
+  };
+
+  const finishPlace = () => {
+    let score = 0;
+    const byLvl = { A1: 0, A2: 0, B1: 0, B2: 0 };
+    const maxLvl = { A1: 0, A2: 0, B1: 0, B2: 0 };
+    PLACE_Q.forEach((item, i) => {
+      maxLvl[item.lvl] = (maxLvl[item.lvl] || 0) + 1;
+      if (answers[i] === item.a) {
+        score++;
+        byLvl[item.lvl] = (byLvl[item.lvl] || 0) + 1;
       }
-      state.dayPlan = plan;
-      state.dayKey = t;
+    });
+    // Strict: need solid lower bands before higher CEFR
+    let cefr = 'A1';
+    const ok = (lvl, need) => (byLvl[lvl] || 0) >= need;
+    if (ok('A1', 2) && ok('A2', 2)) cefr = 'A2';
+    if (ok('A1', 2) && ok('A2', 3) && ok('B1', 2)) cefr = 'B1';
+    if (ok('A1', 2) && ok('A2', 3) && ok('B1', 3) && ok('B2', 3)) cefr = 'B2';
+    // Cap by total score too
+    if (score <= 4) cefr = 'A1';
+    else if (score <= 7 && cefr !== 'A1') cefr = (cefr === 'B2' ? 'B1' : cefr);
+    else if (score <= 10 && cefr === 'B2') cefr = 'B1';
+    S.cefr = cefr;
+    S.goal = 'Conversational English';
+    save();
+    const labels = {
+      A1: 'Старт: простые фразы о себе, еде, месте, просьбах.',
+      A2: 'База: быт, планы, прошлое, простые диалоги.',
+      B1: 'Разговорный уровень: мнения, истории, уточнения.',
+      B2: 'Свободнее: споры, нюансы, длинные объяснения.'
+    };
+    const honest = {
+      A1: 'Честно для старта: короткие фразы, много поддержки.',
+      A2: 'База есть; диалоги ещё простые.',
+      B1: 'Уже можно говорить о жизни; ошибки нормальны.',
+      B2: 'Только если уверенно понимаешь сложные фразы выше — иначе выбери B1.'
+    };
+    inner.innerHTML = `
+      <h1>Результат теста: ${cefr}</h1>
+      <p style="color:var(--muted);margin:12px 0;line-height:1.5">Верно ${score} из ${PLACE_Q.length}. ${labels[cefr]}</p>
+      <div class="tip">${honest[cefr]}<br><br>Тест короткий — <strong>лучше занизить</strong>, чем завысить. С завышенным уровнем ИИ и слова будут слишком сложными.</div>
+      <div class="fg"><label>Оставь или поправь уровень</label>
+        <select id="obCefr">
+          <option value="A1" ${cefr==='A1'?'selected':''}>A1 — начинающий</option>
+          <option value="A2" ${cefr==='A2'?'selected':''}>A2 — элементарный</option>
+          <option value="B1" ${cefr==='B1'?'selected':''}>B1 — средний (разговорный минимум)</option>
+          <option value="B2" ${cefr==='B2'?'selected':''}>B2 — выше среднего</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-block" onclick="window.__obGo()">Начать с этого уровня</button>
+    `;
+    window.__obGo = () => {
+      const pick = document.getElementById('obCefr')?.value || cefr;
+      S.cefr = pick;
       save();
-    }
-
-    function regenerateDay() {
-      state.dayKey = null;
-      ensureDayPlan();
+      try { localStorage.setItem('encore_onboarded', '1'); } catch (e) {}
+      document.getElementById('onboard').classList.add('hidden');
+      addWordsForLevel();
       renderToday();
-      toast('План на сегодня обновлён', 'ok');
-    }
+      toast('Уровень ' + pick + ' · колода готова', 'ok');
+    };
+  };
 
-    async function aiDayPlan() {
-      if (!hasAi()) {
-        toast('Сначала настрой ИИ в Ещё', 'err');
-        switchScreen('settings');
-        return;
-      }
-      toast('Собираю план…');
-      try {
-        const system = `You are an expert English coach. Build a realistic daily study plan for CEFR ${state.cefr}, goal: "${state.goal || 'general English'}", total about ${state.minutesTarget} minutes. Reply ONLY valid JSON array of 3-5 objects: [{"title":"...","skill":"listening|speaking|reading|writing|vocab|grammar","mins":10,"desc":"clear task in Russian, practice in English","xp":35}]. Tasks must be concrete and doable today.`;
-        const user = 'Generate today plan.';
-        const raw = await callAi(system, user);
-        const arr = parseJsonArray(raw);
-        if (!arr || !arr.length) throw new Error('Пустой ответ ИИ');
-        state.dayPlan = arr.slice(0, 6).map(q => ({
-          id: uid(),
-          title: String(q.title || 'Task').slice(0, 80),
-          skill: SKILLS.some(s => s.id === q.skill) ? q.skill : 'vocab',
-          mins: Math.min(40, Math.max(5, parseInt(q.mins, 10) || 10)),
-          desc: String(q.desc || '').slice(0, 400),
-          done: false,
-          xp: Math.min(200, Math.max(15, parseInt(q.xp, 10) || 30))
-        }));
-        state.dayKey = todayKey();
-        save();
-        renderToday();
-        toast('ИИ-план готов', 'ok');
-      } catch (e) {
-        toast(e.message || 'Ошибка ИИ', 'err');
-      }
-    }
+  renderIntro();
+}
 
-    function completeQuest(id) {
-      const q = state.dayPlan.find(x => x.id === id);
-      if (!q || q.done) return;
-      q.done = true;
-      state.xp = (state.xp || 0) + (q.xp || 20);
-      if (state.skills[q.skill]) {
-        state.skills[q.skill].xp = (state.skills[q.skill].xp || 0) + (q.xp || 20);
-        state.skills[q.skill].level = levelFromXp(state.skills[q.skill].xp);
-      }
-      markActiveToday();
-      state.log.unshift({
-        id: uid(),
-        date: todayKey(),
-        text: '✓ ' + q.title + ' (+' + q.xp + ' XP)',
-        skill: q.skill
-      });
-      if (state.log.length > 100) state.log.length = 100;
-      save();
-      renderToday();
-      renderSkills();
-      toast('+' + q.xp + ' XP · ' + q.title, 'ok');
-    }
 
-    // ——— AI ———
-    async function callAi(system, user) {
-      if (!hasAi()) throw new Error('Нет ИИ: proxy или ключ Groq');
-      const proxy = getProxyUrl();
-      const url = proxy || (GROQ_BASE + '/chat/completions');
-      const headers = { 'Content-Type': 'application/json' };
-      if (proxy) {
-        const anon = getAnonKey();
-        if (anon) {
-          headers['Authorization'] = 'Bearer ' + anon;
-          headers['apikey'] = anon;
-        }
-      } else {
-        const k = getApiKey();
-        if (!k) throw new Error('Нужен Proxy URL (рекомендуется) или ключ Groq');
-        headers['Authorization'] = 'Bearer ' + k;
-      }
-      let res;
-      try {
-        res = await fetch(url, {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({
-            model: (state.ai && state.ai.model) || 'openai/gpt-oss-20b',
-            messages: [
-              { role: 'system', content: system },
-              { role: 'user', content: user }
-            ],
-            temperature: 0.7,
-            max_tokens: 1200
-          })
-        });
-      } catch (e) {
-        throw new Error('Сеть: ' + (e.message || 'Load failed'));
-      }
-      if (!res.ok) {
-        const txt = await res.text().catch(() => '');
-        let msg = 'HTTP ' + res.status;
-        try {
-          const err = JSON.parse(txt);
-          msg = err.error?.message || err.message || msg;
-          if (typeof err.error === 'string') msg = err.error;
-        } catch (_) {
-          if (txt) msg = txt.slice(0, 160);
-        }
-        if (res.status === 401) msg += ' — ключ/JWT/proxy';
-        throw new Error(msg);
-      }
-      const data = await res.json();
-      return data.choices?.[0]?.message?.content || '';
-    }
+/* ---------- AI ---------- */
+function getProxy() {
+  try { return (localStorage.getItem(LS_PROXY) || DEFAULT_PROXY_URL || '').trim().replace(/\/$/, ''); }
+  catch (e) { return (DEFAULT_PROXY_URL || '').trim(); }
+}
+function getAnon() {
+  try { return (localStorage.getItem(LS_ANON) || DEFAULT_SUPABASE_ANON_KEY || '').trim(); }
+  catch (e) { return (DEFAULT_SUPABASE_ANON_KEY || '').trim(); }
+}
+function getKey() {
+  try { return localStorage.getItem(SECRET) || ''; } catch (e) { return ''; }
+}
+function hasAi() { return !!(getProxy() || getKey()); }
 
-    function parseJsonArray(text) {
-      if (!text) return null;
-      let t = text.trim();
-      const fence = t.match(/```(?:json)?\s*([\s\S]*?)```/i);
-      if (fence) t = fence[1].trim();
-      const a = t.indexOf('['), b = t.lastIndexOf(']');
-      if (a >= 0 && b > a) t = t.slice(a, b + 1);
-      return JSON.parse(t);
-    }
+async function callAi(system, user, maxTokens) {
+  maxTokens = maxTokens || 800;
+  const proxy = getProxy();
+  const url = proxy
+    ? (proxy.includes('/chat/completions') ? proxy : proxy)
+    : GROQ_BASE + '/chat/completions';
+  const headers = { 'Content-Type': 'application/json' };
+  if (proxy) {
+    const anon = getAnon();
+    if (anon) { headers['Authorization'] = 'Bearer ' + anon; headers['apikey'] = anon; }
+  } else {
+    headers['Authorization'] = 'Bearer ' + getKey();
+  }
+  const body = {
+    model: 'openai/gpt-oss-20b',
+    messages: [
+      { role: 'system', content: system },
+      { role: 'user', content: user }
+    ],
+    temperature: 0.7,
+    max_completion_tokens: maxTokens
+  };
+  // Some proxies expect path /chat/completions appended
+  let endpoint = url;
+  if (proxy && !proxy.includes('chat/completions') && !proxy.includes('Qroq') && !proxy.includes('groq') && !proxy.includes('proxy')) {
+    endpoint = proxy.replace(/\/$/, '') + '/chat/completions';
+  }
+  // For supabase edge proxy, body is usually forwarded as-is to groq
+  const res = await fetch(proxy || endpoint, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(proxy ? body : body)
+  });
+  if (!res.ok) {
+    const t = await res.text().catch(() => '');
+    throw new Error('AI HTTP ' + res.status + (t ? ': ' + t.slice(0, 120) : ''));
+  }
+  const data = await res.json();
+  const text = data.choices?.[0]?.message?.content || data.content || '';
+  if (!text) throw new Error('Empty AI response');
+  return text.trim();
+}
 
-    function tutorSystemPrompt() {
-      const cefr = state.cefr;
-      const goal = state.goal || 'general fluency';
-      const base = `You are a friendly, strict-when-needed English tutor inside ENGLISH LIFE RPG.
-Student CEFR: ${cefr}. Goal: ${goal}.
+function tutorSystem() {
+  return `You are a strict but friendly English tutor for a ${S.cefr} learner (goal: ${S.goal || 'general English'}).
 Rules:
-- Prefer English in examples; short Russian only when explaining hard points.
-- Correct mistakes gently: show corrected line + 1 tip.
-- Keep replies concise (under 180 words) unless student asks for more.
-- Push the student to produce language, not only read theory.`;
+- Prefer short, clear English. Add brief Russian only when explaining a hard rule.
+- Correct mistakes gently: show corrected version + 1-line reason.
+- Push full sentences for real conversation (self, opinions, plans, stories). Include travel situations when relevant.
+- Stay at ${S.cefr} level: do not overwhelm with rare vocabulary.
+- If the user writes in Russian, answer in English and encourage English.`;
+}
 
-      if (tutorMode === 'correct') {
-        return base + `\nMode: CORRECT TEXT. Student pastes English. Reply with: 1) Corrected version 2) Bullet list of key fixes 3) One better alternative phrase.`;
-      }
-      if (tutorMode === 'vocab') {
-        return base + `\nMode: VOCABULARY. Teach 5 useful words/phrases at ${cefr} for a topic the student chooses (or daily life). For each: word, simple definition, 1 example sentence. End with a 3-question mini quiz.`;
-      }
-      if (tutorMode === 'role') {
-        return base + `\nMode: ROLEPLAY. Stay in character. Start a realistic scenario at ${cefr} difficulty. After each student reply, continue the scene and briefly note 1 improvement if needed in [brackets].`;
-      }
-      return base + `\nMode: FREE DIALOGUE. Chat naturally, ask follow-ups, correct only important errors inline.`;
+/* ---------- SRS (SM-2 light) ---------- */
+function dueWords() {
+  const now = Date.now();
+  return S.words.filter(w => !w.due || w.due <= now).sort((a, b) => (a.due || 0) - (b.due || 0));
+}
+
+function schedule(w, grade) {
+  // grade: 0 again, 1 hard, 2 good, 3 easy
+  w.reps = (w.reps || 0) + 1;
+  if (grade === 0) {
+    w.lapses = (w.lapses || 0) + 1;
+    w.ef = Math.max(1.3, (w.ef || 2.5) - 0.2);
+    w.due = Date.now() + 10 * 60 * 1000; // 10 min
+    w.interval = 0;
+  } else {
+    w.ef = Math.min(2.8, (w.ef || 2.5) + (grade === 3 ? 0.15 : grade === 2 ? 0.05 : -0.05));
+    if (!w.interval || w.interval < 1) w.interval = grade === 3 ? 3 : 1;
+    else w.interval = Math.round(w.interval * w.ef * (grade === 1 ? 0.8 : 1));
+    w.due = Date.now() + w.interval * 86400000;
+  }
+}
+
+function addWordsForLevel() {
+  // General conversation first, travel as useful extra
+  const general = SEED[S.cefr] || SEED.A2;
+  const travel = TRAVEL_SEED[S.cefr] || TRAVEL_SEED.A2;
+  const pack = general.concat(travel);
+  let added = 0;
+  const have = new Set(S.words.map(w => w.en.toLowerCase()));
+  pack.forEach(([en, ru, ex]) => {
+    if (have.has(en.toLowerCase())) return;
+    S.words.push({ id: uid(), en, ru, ex, ef: 2.5, due: Date.now(), reps: 0, lapses: 0, interval: 0, tag: 'travel' });
+    have.add(en.toLowerCase());
+    added++;
+  });
+  if (S.words.length < 40) {
+    const idx = CEFR_ORDER.indexOf(S.cefr);
+    if (idx > 0) {
+      const prevT = TRAVEL_SEED[CEFR_ORDER[idx - 1]] || [];
+      prevT.forEach(([en, ru, ex]) => {
+        if (have.has(en.toLowerCase())) return;
+        S.words.push({ id: uid(), en, ru, ex, ef: 2.5, due: Date.now(), reps: 0, lapses: 0, interval: 0, tag: 'travel' });
+        have.add(en.toLowerCase());
+        added++;
+      });
     }
+  }
+  save();
+  renderWords();
+  renderToday();
+  toast(added ? ('+' + added + ' слов') : 'Все слова уровня уже в колоде', added ? 'ok' : '');
+}
 
-    async function sendChat() {
-      if (chatBusy) return;
-      const input = document.getElementById('chatInput');
-      const text = (input.value || '').trim();
-      if (!text) return;
-      if (!hasAi()) {
-        toast('Настрой ИИ в Ещё', 'err');
-        switchScreen('settings');
-        return;
-      }
-      input.value = '';
-      state.chat.push({ role: 'user', text, mode: tutorMode, ts: Date.now() });
-      if (state.chat.length > 40) state.chat = state.chat.slice(-40);
+function startReview() {
+  const list = dueWords();
+  if (!list.length) {
+    toast('Нет карточек к повторению — добавь слова или приходи позже');
+    return;
+  }
+  let i = 0;
+  let flipped = false;
+  const show = () => {
+    if (i >= list.length) {
+      closeModal();
+      logMins(Math.max(3, Math.round(list.length * 0.4)));
+      markStep('srs');
+      S.stats.reviews = (S.stats.reviews || 0) + 1;
       save();
-      renderChat();
-      chatBusy = true;
-      document.getElementById('sendBtn').disabled = true;
-      try {
-        const history = state.chat.slice(-8).map(m =>
-          (m.role === 'user' ? 'Student: ' : 'Tutor: ') + m.text
-        ).join('\n');
-        const reply = await callAi(tutorSystemPrompt(), history + '\nTutor:');
-        state.chat.push({ role: 'bot', text: reply.trim(), mode: tutorMode, ts: Date.now() });
-        // small XP for practice
-        state.xp += 8;
-        if (tutorMode === 'speaking' || tutorMode === 'role' || tutorMode === 'chat') {
-          state.skills.speaking.xp += 8;
-          state.skills.speaking.level = levelFromXp(state.skills.speaking.xp);
-        } else if (tutorMode === 'correct' || tutorMode === 'vocab') {
-          state.skills.writing.xp += 5;
-          state.skills.vocab.xp += 5;
-          state.skills.writing.level = levelFromXp(state.skills.writing.xp);
-          state.skills.vocab.level = levelFromXp(state.skills.vocab.xp);
-        }
-        markActiveToday();
-        save();
-        renderChat();
-      } catch (e) {
-        toast(e.message || 'Ошибка ИИ', 'err');
-        state.chat.push({ role: 'sys', text: 'Ошибка: ' + (e.message || 'fail'), ts: Date.now() });
-        renderChat();
-      }
-      chatBusy = false;
-      document.getElementById('sendBtn').disabled = false;
-    }
-
-    // ——— RENDER ———
-    function renderToday() {
-      ensureDayPlan();
-      const el = document.getElementById('todayContent');
-      const prog = xpInLevel(state.xp || 0);
-      const done = state.dayPlan.filter(q => q.done).length;
-      const total = state.dayPlan.length;
-      const minsDone = state.dayPlan.filter(q => q.done).reduce((s, q) => s + q.mins, 0);
-      const minsTotal = state.dayPlan.reduce((s, q) => s + q.mins, 0);
-      const pct = total ? Math.round((done / total) * 100) : 0;
-
-      el.innerHTML = `
-        <div class="hero-card">
-          <div class="flex-between">
-            <div class="hero-name">${esc(state.name)}</div>
-            <span class="badge">${esc(state.cefr)}</span>
-          </div>
-          <div class="hero-lvl">LVL ${prog.level}</div>
-          <div class="progress-wrap"><div class="progress-bar" style="width:${prog.percent}%"></div></div>
-          <div style="font-size:0.82rem;color:var(--text-muted)">${state.xp} XP · серия <span class="mins">${state.streak || 0}</span> дн</div>
-          ${state.goal ? `<div style="margin-top:8px;font-size:0.84rem;color:var(--text-dim)">Цель: ${esc(state.goal)}</div>` : ''}
-        </div>
-
-        <div class="stats-row">
-          <div class="stat-mini"><div class="v">${done}/${total}</div><div class="l">Квесты</div></div>
-          <div class="stat-mini"><div class="v">${minsDone}</div><div class="l">Мин ✓</div></div>
-          <div class="stat-mini"><div class="v">${minsTotal}</div><div class="l">План, мин</div></div>
-        </div>
-
-        <div class="card" style="margin-top:12px">
-          <div class="flex-between" style="margin-bottom:10px">
-            <strong style="font-size:0.95rem">План на сегодня</strong>
-            <span class="badge badge-gold">${pct}%</span>
-          </div>
-          <div class="progress-wrap"><div class="progress-bar gold" style="width:${pct}%"></div></div>
-          <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
-            <button class="btn btn-secondary btn-sm" onclick="regenerateDay()">Стандартный план</button>
-            <button class="btn btn-primary btn-sm" onclick="aiDayPlan()">ИИ-план</button>
-          </div>
-        </div>
-
-        ${state.dayPlan.map(q => {
-          const sk = SKILLS.find(s => s.id === q.skill);
-          return `
-          <div class="card quest-card ${q.done ? 'done' : ''}">
-            <div class="q-title">${esc(q.title)}</div>
-            <div class="q-meta">
-              <span class="badge">${sk ? sk.ico + ' ' + sk.name : q.skill}</span>
-              <span class="badge badge-gold">${q.mins} мин</span>
-              <span class="badge badge-green">+${q.xp} XP</span>
-            </div>
-            <div class="q-desc">${esc(q.desc)}</div>
-            <div class="q-actions">
-              ${q.done
-                ? '<span class="badge badge-green">Готово</span>'
-                : `<button class="btn btn-success btn-sm" onclick="completeQuest('${q.id}')">Сделал</button>
-                   <button class="btn btn-secondary btn-sm" onclick="switchScreen('practice')">С тьютором</button>`}
-            </div>
-          </div>`;
-        }).join('')}
-
-        <div class="card">
-          <strong style="font-size:0.9rem">Как качать язык 30–60 мин</strong>
-          <p style="font-size:0.84rem;color:var(--text-dim);margin-top:8px;line-height:1.5">
-            1) Закрой квесты дня без идеальности.<br>
-            2) 10+ минут говори или пиши сам (не только читай).<br>
-            3) Раз в день — ИИ-тьютор: диалог или «исправь текст».<br>
-            4) Серия дней важнее одного «марафона».
-          </p>
-        </div>
-      `;
-    }
-
-    function renderSkills() {
-      const el = document.getElementById('skillsContent');
-      el.innerHTML = `
-        <div class="card">
-          ${SKILLS.map(s => {
-            const d = state.skills[s.id] || { xp: 0, level: 1 };
-            const p = xpInLevel(d.xp || 0);
-            return `
-              <div class="skill-row">
-                <div class="skill-ico">${s.ico}</div>
-                <div class="skill-info">
-                  <div class="skill-name">${s.name}</div>
-                  <div class="skill-lvl">LVL ${p.level} · ${d.xp || 0} XP · ${s.tip}</div>
-                  <div class="progress-wrap" style="margin:6px 0 0"><div class="progress-bar" style="width:${p.percent}%"></div></div>
-                </div>
-              </div>`;
-          }).join('')}
-        </div>
-        <div class="card">
-          <p style="font-size:0.86rem;color:var(--text-dim);line-height:1.5">
-            Навыки растут от квестов и чата с тьютором. Не пытайся качать всё сразу:
-            в дни с малым временем бери Listening + Vocab, в дни с голосом — Speaking.
-          </p>
-        </div>
-      `;
-    }
-
-    function renderChat() {
-      const el = document.getElementById('chatMessages');
-      if (!state.chat.length) {
-        el.innerHTML = `<div class="msg sys">Выбери режим сверху и напиши на английском.<br>Пример: "Let's talk about my weekend" или вставь текст для правки.</div>`;
-        return;
-      }
-      el.innerHTML = state.chat.map(m => {
-        const cls = m.role === 'user' ? 'user' : m.role === 'bot' ? 'bot' : 'sys';
-        return `<div class="msg ${cls}">${esc(m.text)}</div>`;
-      }).join('');
-      el.scrollTop = el.scrollHeight;
-    }
-
-    function renderLog() {
-      const el = document.getElementById('logContent');
-      if (!state.log.length) {
-        el.innerHTML = `<div class="empty"><h3>Пока пусто</h3><p>Закрывай квесты — записи появятся сами. Или добавь заметку вручную.</p></div>`;
-        return;
-      }
-      el.innerHTML = state.log.map(l => `
-        <div class="card" style="padding:12px 14px">
-          <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:4px">${esc(l.date)}${l.skill ? ' · ' + l.skill : ''}</div>
-          <div style="font-size:0.9rem">${esc(l.text)}</div>
-        </div>
-      `).join('');
-    }
-
-    function addLogManual() {
-      const text = prompt('Что сделал / чему научился?');
-      if (!text || !text.trim()) return;
-      state.log.unshift({ id: uid(), date: todayKey(), text: text.trim().slice(0, 300) });
-      markActiveToday();
-      save();
-      renderLog();
-      toast('Запись добавлена', 'ok');
-    }
-
-    function populateSettings() {
-      document.getElementById('setName').value = state.name || '';
-      document.getElementById('setCefr').value = state.cefr || 'A2';
-      document.getElementById('setMinutes').value = String(state.minutesTarget || 30);
-      document.getElementById('setGoal').value = state.goal || '';
-      const proxyEl = document.getElementById('setProxyUrl');
-      if (proxyEl) proxyEl.value = getProxyUrl();
-      const anonEl = document.getElementById('setAnonKey');
-      if (anonEl) anonEl.value = getAnonKey();
-      const modelEl = document.getElementById('setModel');
-      if (modelEl) modelEl.value = (state.ai && state.ai.model) || 'openai/gpt-oss-20b';
-      const st = document.getElementById('aiStatus');
-      if (st) {
-        if (getProxyUrl()) st.textContent = 'Статус: Proxy задан' + (getAnonKey() ? ' + key' : ' (добавь anon key при 401)');
-        else st.textContent = 'Статус: вставь Proxy URL из Supabase';
-      }
-    }
-
-    function saveProfile() {
-      state.name = (document.getElementById('setName').value || 'Learner').trim().slice(0, 32);
-      const cefr = document.getElementById('setCefr').value;
-      const mins = parseInt(document.getElementById('setMinutes').value, 10) || 30;
-      const cefrChanged = cefr !== state.cefr;
-      const minsChanged = mins !== state.minutesTarget;
-      state.cefr = cefr;
-      state.minutesTarget = mins;
-      state.goal = (document.getElementById('setGoal').value || '').trim().slice(0, 120);
-      if (cefrChanged || minsChanged) {
-        state.dayKey = null;
-        ensureDayPlan();
-      }
-      save();
-      toast('Профиль сохранён', 'ok');
+      renderWords();
       renderToday();
+      toast('Повтор завершён', 'ok');
+      return;
     }
-
-    function saveAi() {
-      if (!state.ai) state.ai = { base: GROQ_BASE, model: 'openai/gpt-oss-20b' };
-      state.ai.base = GROQ_BASE;
-      const modelEl = document.getElementById('setModel');
-      state.ai.model = (modelEl && modelEl.value) || 'openai/gpt-oss-20b';
-      setProxyUrl(document.getElementById('setProxyUrl')?.value || '');
-      setAnonKey(document.getElementById('setAnonKey')?.value || '');
+    const w = list[i];
+    flipped = false;
+    openModal(`
+      <h2>Повтор ${i + 1}/${list.length}</h2>
+      <div class="card flash-card" id="flash" onclick="window.__flipFlash()">
+        <div class="front en" id="flashFront">${esc(w.en)}</div>
+        <div class="back hidden" id="flashBack">${esc(w.ru)}</div>
+        <div class="ex hidden" id="flashEx">${esc(w.ex || '')}</div>
+        <p style="font-size:0.75rem;color:var(--dim);margin-top:16px" id="flashHint">нажми, чтобы перевернуть</p>
+      </div>
+      <div class="row" id="gradeRow" style="display:none;margin-top:12px">
+        <button class="btn btn-danger btn-sm" style="flex:1" onclick="window.__grade(0)">Снова</button>
+        <button class="btn btn-secondary btn-sm" style="flex:1" onclick="window.__grade(1)">Трудно</button>
+        <button class="btn btn-success btn-sm" style="flex:1" onclick="window.__grade(2)">Хорошо</button>
+        <button class="btn btn-primary btn-sm" style="flex:1" onclick="window.__grade(3)">Легко</button>
+      </div>
+      <button class="btn btn-secondary btn-block" style="margin-top:10px" onclick="closeModal()">Закрыть</button>
+    `);
+    window.__flipFlash = () => {
+      flipped = true;
+      document.getElementById('flashBack').classList.remove('hidden');
+      document.getElementById('flashEx').classList.remove('hidden');
+      document.getElementById('flashHint').classList.add('hidden');
+      document.getElementById('gradeRow').style.display = 'flex';
+    };
+    window.__grade = (g) => {
+      schedule(w, g);
       save();
-      populateSettings();
-      toast(hasAi() ? 'ИИ сохранён' : 'Вставь Proxy URL', hasAi() ? 'ok' : 'err');
+      i++;
+      show();
+    };
+  };
+  show();
+}
+
+/* ---------- Daily path ---------- */
+function pathSteps() {
+  const m = S.minutes || 30;
+  // Conversational path: SRS + phrases + speaking/writing
+  const steps = [
+    { id: 'srs', title: 'Повтор слов (SRS)', mins: Math.min(12, Math.round(m * 0.3)), desc: 'Частые слова к повтору' },
+    { id: 'input', title: 'Фразы для разговора', mins: Math.round(m * 0.2), desc: 'Шаблоны: мнение, просьба, рассказ' },
+    { id: 'output', title: 'Диалог или письмо', mins: Math.round(m * 0.4), desc: 'Главное ускорение — говорить и писать' },
+    { id: 'review', title: '3 фразы на память', mins: Math.max(3, Math.round(m * 0.1)), desc: 'Скажи вслух без подсказки' }
+  ];
+  return steps;
+}
+
+function markStep(id) {
+  S.today.steps[id] = true;
+  save();
+  renderToday();
+}
+
+function logMins(n) {
+  ensureToday();
+  S.today.mins = (S.today.mins || 0) + n;
+  if (S.today.mins >= (S.minutes || 30) * 0.5) {
+    // partial day counts toward maintaining streak marker
+    S.streak.last = today();
+  }
+  save();
+  renderToday();
+}
+
+function renderToday() {
+  ensureToday();
+  document.getElementById('cefrBadge').textContent = S.cefr;
+  document.getElementById('todaySub').textContent =
+    (S.name || 'Learner') + ' · ' + (S.minutes || 30) + ' мин · ' + (S.goal || 'English');
+  document.getElementById('stStreak').textContent = S.streak.n || 0;
+  document.getElementById('stMins').textContent = S.today.mins || 0;
+  document.getElementById('stWords').textContent = S.words.length;
+
+  const steps = pathSteps();
+  const done = steps.filter(s => S.today.steps[s.id]).length;
+  const pct = Math.round((done / steps.length) * 100);
+
+  let html = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <strong style="font-size:0.95rem">Маршрут дня</strong>
+      <span class="badge ${pct===100?'badge-green':''}">${done}/${steps.length}</span>
+    </div>
+    <div class="progress"><i style="width:${pct}%"></i></div>
+  `;
+  steps.forEach((s, idx) => {
+    const isDone = !!S.today.steps[s.id];
+    const action = s.id === 'srs' ? 'startReview()'
+      : s.id === 'input' ? 'showPatterns()'
+      : s.id === 'output' ? 'startDialogue()'
+      : 'finishReview()';
+    html += `
+      <div class="step ${isDone ? 'done' : ''}" onclick="${action}">
+        <div class="num">${isDone ? '✓' : (idx + 1)}</div>
+        <div style="flex:1;min-width:0">
+          <h3>${s.title}</h3>
+          <p>~${s.mins} мин · ${s.desc}</p>
+        </div>
+      </div>`;
+  });
+  if (!S.words.length) {
+    html += `<button class="btn btn-primary btn-block" onclick="addWordsForLevel()">Начать: загрузить слова ${S.cefr}</button>`;
+  } else if (dueWords().length) {
+    html += `<button class="btn btn-primary btn-block" onclick="startReview()">Повторить ${dueWords().length} карточек</button>`;
+  } else {
+    html += `<button class="btn btn-secondary btn-block" onclick="go('practice')">Перейти к практике</button>`;
+  }
+  document.getElementById('pathCard').innerHTML = html;
+}
+
+function finishReview() {
+  openModal(`
+    <h2>Обзор дня</h2>
+    <p style="color:var(--muted);font-size:0.9rem;margin-bottom:12px">Напиши 3 вещи на английском, которые запомнил сегодня (слова или фразы).</p>
+    <textarea id="dayReview" placeholder="1.&#10;2.&#10;3."></textarea>
+    <div class="row" style="margin-top:12px">
+      <button class="btn btn-secondary" style="flex:1" onclick="closeModal()">Позже</button>
+      <button class="btn btn-primary" style="flex:1" onclick="saveDayReview()">Готово</button>
+    </div>
+  `);
+}
+
+function saveDayReview() {
+  const t = document.getElementById('dayReview')?.value || '';
+  markStep('review');
+  logMins(3);
+  S.stats.sessions = (S.stats.sessions || 0) + 1;
+  if ((S.today.mins || 0) >= 10) {
+    const yday = today();
+    if (S.streak.last !== yday) {
+      /* streak already handled on day roll; mark activity */
     }
+  }
+  save();
+  closeModal();
+  toast(t.trim() ? 'День зафиксирован' : 'Шаг отмечен', 'ok');
+  renderToday();
+}
 
-    async function testAi() {
-      saveAi();
-      if (!hasAi()) { toast('Сначала вставь Proxy URL', 'err'); return; }
-      toast('Проверяю…');
-      try {
-        const r = await callAi('Reply with one word: ok', 'ping');
-        toast('Связь ок: ' + (r || '').slice(0, 40), 'ok');
-      } catch (e) {
-        toast(e.message || 'Ошибка', 'err');
-      }
-    }
+/* ---------- Words UI ---------- */
+function renderWords() {
+  const due = dueWords().length;
+  document.getElementById('srsStats').innerHTML = `
+    <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
+      <div><span class="badge">${S.words.length} в колоде</span></div>
+      <div><span class="badge badge-gold">${due} к повтору</span></div>
+      <div><span class="badge badge-green">${S.stats.reviews || 0} сессий</span></div>
+    </div>
+    <p style="font-size:0.82rem;color:var(--muted);margin-top:10px">SRS показывает карточку снова через интервал. «Снова» — скоро; «Легко» — через дни.</p>
+  `;
+  const list = S.words.slice().sort((a, b) => (a.due || 0) - (b.due || 0)).slice(0, 40);
+  document.getElementById('wordList').innerHTML = list.length ? list.map(w => {
+    const dueL = !w.due || w.due <= Date.now() ? 'сейчас' : new Date(w.due).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+    return `<div class="card" style="padding:12px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;gap:8px">
+        <div><strong class="en">${esc(w.en)}</strong><div style="font-size:0.82rem;color:var(--muted)">${esc(w.ru)}</div></div>
+        <span class="badge">${dueL}</span>
+      </div>
+    </div>`;
+  }).join('') : '<p style="color:var(--muted);font-size:0.9rem">Колода пуста. Нажми «+ Слова моего уровня».</p>';
+}
 
-    function exportData() {
-      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'english-life-rpg-save.json';
-      a.click();
-      toast('Экспорт без API-ключа', 'ok');
-    }
+/* ---------- Practice ---------- */
+function showPatterns() {
+  const pack = (PATTERNS[S.cefr] || PATTERNS.A2).concat(TRAVEL_PATTERNS[S.cefr] || []).slice(0, 10);
+  openModal(`
+    <h2>Фразы · ${S.cefr}</h2>
+    <p style="font-size:0.84rem;color:var(--muted);margin-bottom:12px">Прочитай вслух. Подставь свои слова. Часть фраз — и для поездок.</p>
+    ${pack.map(p => `
+      <div class="card" style="margin-bottom:8px;padding:12px">
+        <div class="en" style="font-weight:700;font-size:1rem">${esc(p.en)}</div>
+        <div style="font-size:0.84rem;color:var(--muted);margin-top:4px">${esc(p.ru)}</div>
+        <div style="font-size:0.84rem;color:var(--accent2);margin-top:6px;font-style:italic">${esc(p.ex)}</div>
+      </div>
+    `).join('')}
+    <button class="btn btn-primary btn-block" onclick="markStep('input');logMins(8);closeModal();toast('Шаблоны отмечены','ok')">Готово · ~8 мин</button>
+  `);
+}
 
-    function resetAll() {
-      setApiKey('');
-      localStorage.removeItem(STORAGE);
-      state = defaultState();
-      ensureDayPlan();
-      save();
-      renderAll();
-      toast('Сброшено', 'ok');
-    }
+function showGrammar() {
+  const pack = GRAMMAR[S.cefr] || GRAMMAR.A2;
+  const g = pack[Math.floor(Math.random() * pack.length)];
+  openModal(`
+    <h2>${esc(g.t)}</h2>
+    <pre style="white-space:pre-wrap;font-family:inherit;font-size:0.9rem;line-height:1.55;color:var(--text);margin:12px 0">${esc(g.body)}</pre>
+    <button class="btn btn-primary btn-block" onclick="markStep('input');logMins(10);closeModal();toast('Грамматика отмечена','ok')">Понял · ~10 мин</button>
+  `);
+}
 
-    function esc(s) {
-      return String(s || '')
-        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    }
+function startWriting() {
+  const prompts = (WRITING_PROMPTS[S.cefr] || WRITING_PROMPTS.A2).concat(TRAVEL_WRITING[S.cefr] || []);
+  const prompt = prompts[Math.floor(Math.random() * prompts.length)];
+  openModal(`
+    <h2>Письмо · ${S.cefr}</h2>
+    <p style="color:var(--accent2);margin-bottom:12px;font-weight:600">${esc(prompt)}</p>
+    <textarea id="writeArea" placeholder="Write in English…"></textarea>
+    <div class="row" style="margin-top:12px">
+      <button class="btn btn-secondary" style="flex:1" onclick="closeModal()">Отмена</button>
+      <button class="btn btn-primary" style="flex:1" onclick="submitWriting()">Проверить</button>
+    </div>
+  `);
+}
 
-    function switchScreen(name) {
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      const screen = document.getElementById('screen-' + name);
-      if (screen) screen.classList.add('active');
-      const btn = document.querySelector(`.nav-btn[data-screen="${name}"]`);
-      if (btn) btn.classList.add('active');
-      if (name === 'today') renderToday();
-      if (name === 'skills') renderSkills();
-      if (name === 'practice') renderChat();
-      if (name === 'log') renderLog();
-      if (name === 'settings') populateSettings();
-    }
+async function submitWriting() {
+  const text = (document.getElementById('writeArea')?.value || '').trim();
+  if (!text) { toast('Напиши текст', 'err'); return; }
+  if (!hasAi()) {
+    markStep('output');
+    logMins(10);
+    S.stats.written = (S.stats.written || 0) + 1;
+    save();
+    closeModal();
+    toast('Сохранено (подключи ИИ для правок)', 'ok');
+    return;
+  }
+  openModal(`<h2>Проверка…</h2><p style="color:var(--muted)">Тьютор читает текст</p>`);
+  try {
+    const reply = await callAi(
+      tutorSystem(),
+      `Student writing task response:\n\n${text}\n\n1) Corrected version\n2) Top 3 mistakes explained simply\n3) One better phrase to learn`,
+      1000
+    );
+    markStep('output');
+    logMins(12);
+    S.stats.written = (S.stats.written || 0) + 1;
+    save();
+    openModal(`
+      <h2>Обратная связь</h2>
+      <div class="card" style="white-space:pre-wrap;font-size:0.9rem;line-height:1.5">${esc(reply)}</div>
+      <button class="btn btn-primary btn-block" onclick="closeModal();renderToday()">Готово</button>
+    `);
+  } catch (e) {
+    openModal(`<h2>Ошибка ИИ</h2><p style="color:var(--muted)">${esc(e.message)}</p>
+      <button class="btn btn-secondary btn-block" onclick="closeModal()">Закрыть</button>`);
+  }
+}
 
-    function renderAll() {
-      renderToday();
-      renderSkills();
-      renderChat();
-      renderLog();
-    }
+async function startDialogue() {
+  const scenes = (DIALOGUE_SCENES[S.cefr] || DIALOGUE_SCENES.A2).concat(TRAVEL_SCENES[S.cefr] || []);
+  const scene = scenes[Math.floor(Math.random() * scenes.length)];
+  if (!hasAi()) {
+    toast('Нужен ИИ для диалога — настрой в Ещё', 'err');
+    go('more');
+    return;
+  }
+  S.chat = [
+    { role: 'sys', text: 'Scene: ' + scene },
+    { role: 'bot', text: 'Let\'s start. I\'ll play the other person. Reply in English.' }
+  ];
+  save();
+  go('tutor');
+  renderChat();
+  try {
+    const reply = await callAi(
+      tutorSystem() + `\nRole-play scene: ${scene}\nYou start the dialogue as the other person. One short turn.`,
+      'Start the role-play now.',
+      400
+    );
+    S.chat.push({ role: 'bot', text: reply });
+    save();
+    renderChat();
+  } catch (e) {
+    toast(e.message, 'err');
+  }
+}
 
-    // nav
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-      btn.addEventListener('click', () => switchScreen(btn.dataset.screen));
-    });
+/* ---------- Tutor chat ---------- */
+function renderChat() {
+  const box = document.getElementById('chatBox');
+  if (!S.chat.length) {
+    box.innerHTML = `<div class="bubble sys">Напиши на английском или запусти диалог из «Практика».</div>`;
+  } else {
+    box.innerHTML = S.chat.map(m => {
+      if (m.role === 'sys') return `<div class="bubble sys">${esc(m.text)}</div>`;
+      return `<div class="bubble ${m.role === 'user' ? 'user' : 'bot'}">${esc(m.text)}</div>`;
+    }).join('');
+  }
+  box.scrollTop = box.scrollHeight;
+  document.getElementById('aiHint').textContent = hasAi()
+    ? 'ИИ подключён'
+    : 'ИИ не настроен — Ещё → Proxy или gsk_';
+}
 
-    document.getElementById('tutorModes').addEventListener('click', e => {
-      const chip = e.target.closest('.chip');
-      if (!chip) return;
-      document.querySelectorAll('#tutorModes .chip').forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-      tutorMode = chip.dataset.mode;
-      toast('Режим: ' + chip.textContent, 'ok');
-    });
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const text = (input.value || '').trim();
+  if (!text) return;
+  if (!hasAi()) { toast('Настрой ИИ в Ещё', 'err'); return; }
+  input.value = '';
+  S.chat.push({ role: 'user', text });
+  renderChat();
+  try {
+    const history = S.chat.filter(m => m.role !== 'sys').slice(-8)
+      .map(m => (m.role === 'user' ? 'Student: ' : 'Tutor: ') + m.text).join('\n');
+    const reply = await callAi(tutorSystem(), history + '\nTutor:', 600);
+    S.chat.push({ role: 'bot', text: reply });
+    markStep('output');
+    logMins(2);
+    save();
+    renderChat();
+  } catch (e) {
+    toast(e.message, 'err');
+  }
+}
 
-    // expose
-    window.switchScreen = switchScreen;
-    window.completeQuest = completeQuest;
-    window.regenerateDay = regenerateDay;
-    window.aiDayPlan = aiDayPlan;
-    window.sendChat = sendChat;
-    window.saveProfile = saveProfile;
-    window.saveAi = saveAi;
-    window.testAi = testAi;
-    window.exportData = exportData;
-    window.resetAll = resetAll;
-    window.addLogManual = addLogManual;
+async function tutorPrompt(extra) {
+  if (!hasAi()) { toast('Нужен ИИ', 'err'); return; }
+  const last = [...S.chat].reverse().find(m => m.role === 'user');
+  const user = last ? last.text + '\n\n' + extra : extra;
+  try {
+    const reply = await callAi(tutorSystem(), user, 700);
+    S.chat.push({ role: 'bot', text: reply });
+    save();
+    renderChat();
+  } catch (e) { toast(e.message, 'err'); }
+}
 
-    load();
-    renderAll();
-  })();
-  </script>
+function clearChat() {
+  S.chat = [];
+  save();
+  renderChat();
+}
+
+/* ---------- More ---------- */
+function fillMore() {
+  document.getElementById('setName').value = S.name || '';
+  document.getElementById('setCefr').value = S.cefr || 'A2';
+  document.getElementById('setMins').value = String(S.minutes || 30);
+  document.getElementById('setGoal').value = S.goal || '';
+  document.getElementById('setProxy').value = getProxy();
+  document.getElementById('setAnon').value = getAnon();
+  document.getElementById('setKey').value = getKey();
+  document.getElementById('aiStatus').textContent = hasAi() ? 'Статус: ИИ готов' : 'Статус: не подключён';
+}
+
+function saveProfile() {
+  S.name = document.getElementById('setName').value.trim() || 'Learner';
+  S.cefr = document.getElementById('setCefr').value;
+  S.minutes = parseInt(document.getElementById('setMins').value, 10) || 30;
+  S.goal = document.getElementById('setGoal').value.trim();
+  save();
+  toast('Профиль сохранён', 'ok');
+  renderToday();
+}
+
+function saveAi() {
+  try {
+    const p = document.getElementById('setProxy').value.trim().replace(/\/$/, '');
+    const a = document.getElementById('setAnon').value.trim();
+    const k = document.getElementById('setKey').value.trim();
+    if (p) localStorage.setItem(LS_PROXY, p); else localStorage.removeItem(LS_PROXY);
+    if (a) localStorage.setItem(LS_ANON, a); else localStorage.removeItem(LS_ANON);
+    if (k) localStorage.setItem(SECRET, k); else localStorage.removeItem(SECRET);
+  } catch (e) {}
+  fillMore();
+  toast(hasAi() ? 'ИИ сохранён' : 'Нужен proxy или gsk_', hasAi() ? 'ok' : 'err');
+}
+
+async function testAi() {
+  saveAi();
+  if (!hasAi()) return;
+  try {
+    const r = await callAi('Reply with one word: ok', 'ping', 16);
+    toast('ИИ: ' + r.slice(0, 40), 'ok');
+  } catch (e) { toast(e.message, 'err'); }
+}
+
+function retakePlacement() {
+  try { localStorage.removeItem('encore_onboarded'); } catch (e) {}
+  showOnboard();
+}
+
+function resetAll() {
+
+  if (!confirm('Сбросить весь прогресс ENCORE?')) return;
+  localStorage.removeItem(STORE);
+  S = { name: 'Learner', cefr: 'A2', minutes: 30, goal: 'Conversational English', streak: { n: 0, last: null },
+    today: { date: today(), mins: 0, steps: {} }, words: [], chat: [], stats: { sessions: 0, reviews: 0, written: 0 } };
+  save();
+  go('today');
+  toast('Сброшено');
+}
+
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* boot */
+load();
+if (!S.goal) S.goal = 'Conversational English';
+renderToday();
+fillMore();
+if (needsOnboard()) showOnboard();
+</script>
 </body>
 </html>
