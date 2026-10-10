@@ -274,7 +274,7 @@
       </div>
       <div class="card">
         <h3 style="font-size:0.95rem;margin-bottom:8px">ИИ (Groq)</h3>
-        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:10px">Для диалога и правок. Proxy или ключ gsk_.</p>
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:10px">Для диалога и правок. Подключён автоматически через proxy (как в LIFE RPG). Поля — только если нужно переопределить.</p>
         <p id="aiStatus" style="font-size:0.8rem;color:var(--dim);margin-bottom:10px"></p>
         <div class="fg"><label>Proxy URL (рекомендуется)</label>
           <input id="setProxy" placeholder="https://….supabase.co/functions/v1/…"></div>
@@ -317,8 +317,8 @@ const LS_PROXY = 'encore_proxy';
 const LS_ANON = 'encore_anon';
 
 // Optional baked proxy (same pattern as LIFE RPG)
-const DEFAULT_PROXY_URL = '';
-const DEFAULT_SUPABASE_ANON_KEY = '';
+const DEFAULT_PROXY_URL = 'https://sghoucsrxbywiafpxxyw.supabase.co/functions/v1/Qroq-proxy';
+const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_vUKnyvXGOcqUdq4tBv03FA_RWkH30qP';
 const GROQ_BASE = 'https://api.groq.com/openai/v1';
 
 const CEFR_ORDER = ['A1','A2','B1','B2','C1'];
@@ -821,14 +821,45 @@ function showOnboard() {
           <option value="60">60</option>
         </select>
       </div>
-      <button class="btn btn-primary btn-block" onclick="window.__obNext()">Определить уровень →</button>
+      <button class="btn btn-primary btn-block" onclick="window.__obNext()">Пройти тест →</button>
+      <button class="btn btn-secondary btn-block" style="margin-top:8px" onclick="window.__obPick()">Выбрать уровень без теста</button>
     `;
-    window.__obNext = () => {
-      S.name = document.getElementById('obName').value.trim() || 'Traveller';
+    window.__obSaveMeta = () => {
+      S.name = document.getElementById('obName').value.trim() || 'Learner';
       S.minutes = parseInt(document.getElementById('obMins').value, 10) || 30;
       S.goal = 'Conversational English';
+    };
+    window.__obNext = () => {
+      window.__obSaveMeta();
       step = 1; qi = 0; answers = [];
       renderQ();
+    };
+    window.__obPick = () => {
+      window.__obSaveMeta();
+      inner.innerHTML = `
+        <h1>Выбери уровень</h1>
+        <p style="color:var(--muted);margin:12px 0;line-height:1.5">Лучше чуть занизить. B1 — уже нормальный разговорный минимум.</p>
+        <div class="fg"><label>CEFR</label>
+          <select id="obCefr">
+            <option value="A1">A1 — почти с нуля</option>
+            <option value="A2" selected>A2 — простые фразы</option>
+            <option value="B1">B1 — могу говорить о жизни</option>
+            <option value="B2">B2 — уверенный разговор</option>
+          </select>
+        </div>
+        <button class="btn btn-primary btn-block" onclick="window.__obGoManual()">Начать</button>
+        <button class="btn btn-secondary btn-block" style="margin-top:8px" onclick="window.__obNext()">Всё же пройти тест</button>
+      `;
+      window.__obGoManual = () => {
+        const pick = document.getElementById('obCefr')?.value || 'A2';
+        S.cefr = pick;
+        save();
+        try { localStorage.setItem('encore_onboarded', '1'); } catch (e) {}
+        document.getElementById('onboard').classList.add('hidden');
+        addWordsForLevel();
+        renderToday();
+        toast('Уровень ' + pick, 'ok');
+      };
     };
   };
 
@@ -914,12 +945,18 @@ function showOnboard() {
 
 /* ---------- AI ---------- */
 function getProxy() {
-  try { return (localStorage.getItem(LS_PROXY) || DEFAULT_PROXY_URL || '').trim().replace(/\/$/, ''); }
-  catch (e) { return (DEFAULT_PROXY_URL || '').trim(); }
+  try {
+    const baked = (DEFAULT_PROXY_URL || '').trim();
+    if (baked) return baked.replace(/\/$/, '');
+    return (localStorage.getItem(LS_PROXY) || '').trim().replace(/\/$/, '');
+  } catch (e) { return (DEFAULT_PROXY_URL || '').trim().replace(/\/$/, ''); }
 }
 function getAnon() {
-  try { return (localStorage.getItem(LS_ANON) || DEFAULT_SUPABASE_ANON_KEY || '').trim(); }
-  catch (e) { return (DEFAULT_SUPABASE_ANON_KEY || '').trim(); }
+  try {
+    const baked = (DEFAULT_SUPABASE_ANON_KEY || '').trim();
+    if (baked) return baked;
+    return (localStorage.getItem(LS_ANON) || '').trim();
+  } catch (e) { return (DEFAULT_SUPABASE_ANON_KEY || '').trim(); }
 }
 function getKey() {
   try { return localStorage.getItem(SECRET) || ''; } catch (e) { return ''; }
@@ -929,16 +966,23 @@ function hasAi() { return !!(getProxy() || getKey()); }
 async function callAi(system, user, maxTokens) {
   maxTokens = maxTokens || 800;
   const proxy = getProxy();
-  const url = proxy
-    ? (proxy.includes('/chat/completions') ? proxy : proxy)
-    : GROQ_BASE + '/chat/completions';
+  const key = getKey();
+  if (!proxy && !key) throw new Error('ИИ не настроен');
+
   const headers = { 'Content-Type': 'application/json' };
+  let url;
   if (proxy) {
+    url = proxy;
     const anon = getAnon();
-    if (anon) { headers['Authorization'] = 'Bearer ' + anon; headers['apikey'] = anon; }
+    if (anon) {
+      headers['Authorization'] = 'Bearer ' + anon;
+      headers['apikey'] = anon;
+    }
   } else {
-    headers['Authorization'] = 'Bearer ' + getKey();
+    url = GROQ_BASE + '/chat/completions';
+    headers['Authorization'] = 'Bearer ' + key;
   }
+
   const body = {
     model: 'openai/gpt-oss-20b',
     messages: [
@@ -946,27 +990,33 @@ async function callAi(system, user, maxTokens) {
       { role: 'user', content: user }
     ],
     temperature: 0.7,
-    max_completion_tokens: maxTokens
+    max_tokens: maxTokens
   };
-  // Some proxies expect path /chat/completions appended
-  let endpoint = url;
-  if (proxy && !proxy.includes('chat/completions') && !proxy.includes('Qroq') && !proxy.includes('groq') && !proxy.includes('proxy')) {
-    endpoint = proxy.replace(/\/$/, '') + '/chat/completions';
+
+  let res;
+  try {
+    res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
+  } catch (e) {
+    throw new Error('Сеть: ' + (e.message || 'Load failed') + '. Проверь интернет / proxy.');
   }
-  // For supabase edge proxy, body is usually forwarded as-is to groq
-  const res = await fetch(proxy || endpoint, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify(proxy ? body : body)
-  });
   if (!res.ok) {
-    const t = await res.text().catch(() => '');
-    throw new Error('AI HTTP ' + res.status + (t ? ': ' + t.slice(0, 120) : ''));
+    const errText = await res.text().catch(() => '');
+    let msg = 'HTTP ' + res.status;
+    try {
+      const err = JSON.parse(errText);
+      msg = err.error?.message || err.message || err.msg || msg;
+    } catch (_) {
+      if (errText) msg = errText.slice(0, 140);
+    }
+    throw new Error(msg);
   }
   const data = await res.json();
-  const text = data.choices?.[0]?.message?.content || data.content || '';
-  if (!text) throw new Error('Empty AI response');
-  return text.trim();
+  const msg = data.choices && data.choices[0] && data.choices[0].message;
+  let text = (msg && msg.content) || data.content || '';
+  // gpt-oss sometimes puts text in reasoning with empty content
+  if (!text && msg && msg.reasoning) text = String(msg.reasoning).slice(0, 500);
+  if (!text) throw new Error('Пустой ответ ИИ — нажми ещё раз');
+  return String(text).trim();
 }
 
 function tutorSystem() {
@@ -1299,21 +1349,27 @@ async function startDialogue() {
   }
   S.chat = [
     { role: 'sys', text: 'Scene: ' + scene },
-    { role: 'bot', text: 'Let\'s start. I\'ll play the other person. Reply in English.' }
+    { role: 'sys', text: '… открываю диалог' }
   ];
   save();
   go('tutor');
   renderChat();
   try {
     const reply = await callAi(
-      tutorSystem() + `\nRole-play scene: ${scene}\nYou start the dialogue as the other person. One short turn.`,
-      'Start the role-play now.',
-      400
+      tutorSystem() + `\nRole-play ONLY. Scene: ${scene}\nYou are the other person (hotel, shop, friend…). One short natural turn in English. Do not explain the exercise.`,
+      'Start now with your first line as the other person.',
+      350
     );
+    S.chat = S.chat.filter(m => m.text !== '… открываю диалог');
     S.chat.push({ role: 'bot', text: reply });
+    markStep('output');
     save();
     renderChat();
   } catch (e) {
+    S.chat = S.chat.filter(m => m.text !== '… открываю диалог');
+    S.chat.push({ role: 'sys', text: 'Ошибка: ' + (e.message || 'AI') });
+    save();
+    renderChat();
     toast(e.message, 'err');
   }
 }
@@ -1341,19 +1397,33 @@ async function sendChat() {
   if (!text) return;
   if (!hasAi()) { toast('Настрой ИИ в Ещё', 'err'); return; }
   input.value = '';
+  input.disabled = true;
   S.chat.push({ role: 'user', text });
+  S.chat.push({ role: 'sys', text: '… думает' });
   renderChat();
   try {
-    const history = S.chat.filter(m => m.role !== 'sys').slice(-8)
+    const history = S.chat.filter(m => m.role === 'user' || m.role === 'bot').slice(-10)
       .map(m => (m.role === 'user' ? 'Student: ' : 'Tutor: ') + m.text).join('\n');
-    const reply = await callAi(tutorSystem(), history + '\nTutor:', 600);
+    const reply = await callAi(
+      tutorSystem(),
+      history + '\n\nReply as Tutor in English (short). If the student wrote Russian, answer in English and gently ask them to try English.',
+      700
+    );
+    S.chat = S.chat.filter(m => m.text !== '… думает');
     S.chat.push({ role: 'bot', text: reply });
     markStep('output');
     logMins(2);
     save();
     renderChat();
   } catch (e) {
-    toast(e.message, 'err');
+    S.chat = S.chat.filter(m => m.text !== '… думает');
+    S.chat.push({ role: 'sys', text: 'Ошибка: ' + (e.message || 'AI') });
+    save();
+    renderChat();
+    toast(e.message || 'Ошибка ИИ', 'err');
+  } finally {
+    input.disabled = false;
+    input.focus();
   }
 }
 
