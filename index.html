@@ -5,1516 +5,249 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="theme-color" content="#0c1220">
-  <title>ENCORE — English in minimal time</title>
+  <title>English Course v1 — Этап 5</title>
   <style>
     :root {
       --bg: #0c1220;
-      --bg2: #121a2b;
       --panel: #162033;
-      --panel2: #1c2a42;
-      --border: rgba(140, 180, 255, 0.1);
-      --border2: rgba(140, 180, 255, 0.18);
+      --border: rgba(140, 180, 255, 0.12);
       --text: #e8eef8;
       --muted: #8b9bb5;
-      --dim: #5c6d88;
       --accent: #4f8cff;
-      --accent2: #7eb0ff;
       --green: #3dd68c;
-      --gold: #f0c14d;
       --red: #ff6b7a;
-      --orange: #ff9f43;
-      --radius: 14px;
-      --nav-h: 60px;
       --safe-t: env(safe-area-inset-top, 0px);
       --safe-b: env(safe-area-inset-bottom, 0px);
-      --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;
+      --nav-h: 60px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html, body {
       height: 100%; height: 100dvh; overflow: hidden;
-      font-family: var(--font); background: var(--bg); color: var(--text);
-      -webkit-font-smoothing: antialiased; line-height: 1.5;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg); color: var(--text); line-height: 1.45;
     }
     body {
       display: flex; flex-direction: column;
-      background:
-        radial-gradient(ellipse 90% 50% at 100% -10%, rgba(79, 140, 255, 0.14), transparent 50%),
-        radial-gradient(ellipse 60% 40% at 0% 80%, rgba(61, 214, 140, 0.06), transparent 45%),
-        var(--bg);
       padding-top: var(--safe-t);
     }
     .screens { flex: 1; min-height: 0; overflow: hidden; padding-bottom: calc(var(--nav-h) + var(--safe-b)); }
-    .screen { display: none; height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 14px 16px 24px; }
-    .screen.active { display: block; animation: in 0.2s ease; }
-    @keyframes in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-
-    .nav {
-      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-      height: calc(var(--nav-h) + var(--safe-b)); padding-bottom: var(--safe-b);
-      background: rgba(12, 18, 32, 0.94); backdrop-filter: blur(16px);
-      border-top: 1px solid var(--border); display: flex;
+    .screen {
+      display: none; height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch;
+      padding: 16px 16px 24px;
     }
-    .nav button {
-      flex: 1; background: none; border: none; color: var(--dim); font-size: 10px; font-weight: 600;
-      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
-      cursor: pointer; font-family: inherit; min-height: 48px;
+    .screen.active { display: block; }
+    h1 { font-size: 1.35rem; font-weight: 750; letter-spacing: -0.3px; }
+    h2 { font-size: 1.15rem; margin-bottom: 12px; }
+    h3 { font-size: 0.95rem; margin: 16px 0 8px; color: var(--muted); }
+    .sub { color: var(--muted); font-size: 0.85rem; margin-top: 2px; }
+    .muted { color: var(--muted); font-size: 0.88rem; margin-bottom: 12px; }
+    .stats {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 14px 0;
     }
-    .nav button.active { color: var(--accent2); }
-    .nav button .ico { font-size: 18px; line-height: 1; }
-
-    h1 { font-size: 1.35rem; font-weight: 750; letter-spacing: -0.4px; }
-    .sub { color: var(--muted); font-size: 0.84rem; margin-top: 2px; }
+    .stat {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+      padding: 12px 8px; text-align: center;
+    }
+    .stat .v { font-size: 1.25rem; font-weight: 750; color: var(--accent); }
+    .stat .l { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
     .card {
-      background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
-      padding: 16px; margin-bottom: 12px;
+      background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+      padding: 14px; margin-bottom: 10px;
     }
+    .card .en { font-weight: 700; font-size: 1rem; }
+    .card .ru, .ru { color: var(--muted); font-size: 0.86rem; margin-top: 4px; }
+    .card .ex, .ex { color: var(--accent); font-size: 0.84rem; margin-top: 6px; font-style: italic; }
+    .ipa { color: var(--muted); font-size: 0.8rem; font-weight: 500; }
+    .row-card { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .badge {
+      font-size: 0.72rem; font-weight: 700; padding: 4px 8px; border-radius: 99px;
+      background: rgba(79, 140, 255, 0.15); color: var(--accent); white-space: nowrap;
+    }
+    .progress {
+      height: 6px; background: rgba(140, 180, 255, 0.12); border-radius: 99px; overflow: hidden; margin: 8px 0 12px;
+    }
+    .progress > i { display: block; height: 100%; background: linear-gradient(90deg, #3d7aef, #6ba0ff); border-radius: 99px; width: 0; }
+    .step {
+      display: flex; gap: 12px; align-items: flex-start; width: 100%; text-align: left;
+      padding: 14px; margin-bottom: 8px; border-radius: 12px; border: 1px solid var(--border);
+      background: var(--panel); color: var(--text); font-family: inherit; cursor: pointer;
+      min-height: 56px;
+    }
+    .step.done { opacity: 0.55; }
+    .step .num {
+      width: 28px; height: 28px; border-radius: 8px; background: rgba(79, 140, 255, 0.2);
+      color: var(--accent); display: flex; align-items: center; justify-content: center;
+      font-weight: 750; font-size: 0.85rem; flex-shrink: 0;
+    }
+    .step.done .num { background: rgba(61, 214, 140, 0.2); color: var(--green); }
+    .step .body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .step strong { font-size: 0.92rem; }
+    .step small { font-size: 0.78rem; color: var(--muted); }
     .btn {
-      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      display: inline-flex; align-items: center; justify-content: center;
       min-height: 44px; padding: 10px 16px; border-radius: 10px; border: none;
       font-size: 0.9rem; font-weight: 650; font-family: inherit; cursor: pointer;
-      transition: transform 0.12s, opacity 0.12s;
+      color: var(--text);
     }
-    .btn:active { transform: scale(0.97); opacity: 0.9; }
-    .btn-primary { background: linear-gradient(180deg, #6ba0ff, #4f8cff); color: #061028; box-shadow: 0 4px 16px rgba(79,140,255,0.3); }
-    .btn-secondary { background: rgba(140,180,255,0.08); color: var(--text); border: 1px solid var(--border2); }
-    .btn-success { background: rgba(61,214,140,0.15); color: var(--green); border: 1px solid rgba(61,214,140,0.35); }
-    .btn-danger { background: rgba(255,107,122,0.12); color: var(--red); border: 1px solid rgba(255,107,122,0.3); }
-    .btn-block { width: 100%; }
-    .btn-sm { min-height: 36px; padding: 6px 12px; font-size: 0.8rem; border-radius: 8px; }
-    .row { display: flex; gap: 8px; flex-wrap: wrap; }
-    .progress {
-      height: 6px; background: rgba(140,180,255,0.1); border-radius: 99px; overflow: hidden; margin: 8px 0;
+    .btn.block { width: 100%; margin-bottom: 8px; }
+    .btn.primary { background: linear-gradient(180deg, #6ba0ff, #4f8cff); color: #061028; }
+    .btn.secondary { background: rgba(140, 180, 255, 0.08); border: 1px solid var(--border); }
+    .btn.success { background: rgba(61, 214, 140, 0.15); color: var(--green); border: 1px solid rgba(61, 214, 140, 0.35); }
+    .btn.danger { background: rgba(255, 107, 122, 0.12); color: var(--red); border: 1px solid rgba(255, 107, 122, 0.3); }
+    .nav {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
+      height: calc(var(--nav-h) + var(--safe-b)); padding-bottom: var(--safe-b);
+      background: rgba(12, 18, 32, 0.94); border-top: 1px solid var(--border);
+      display: flex;
     }
-    .progress > i { display: block; height: 100%; background: linear-gradient(90deg, #3d7aef, #6ba0ff); border-radius: 99px; }
-    .badge {
-      display: inline-block; font-size: 0.72rem; font-weight: 700; padding: 3px 8px;
-      border-radius: 99px; background: rgba(79,140,255,0.15); color: var(--accent2);
+    .nav button {
+      flex: 1; background: none; border: none; color: var(--muted); font-size: 10px; font-weight: 600;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+      font-family: inherit; min-height: 48px; cursor: pointer;
     }
-    .badge-gold { background: rgba(240,193,77,0.15); color: var(--gold); }
-    .badge-green { background: rgba(61,214,140,0.15); color: var(--green); }
-    input, textarea, select {
-      width: 100%; padding: 12px 14px; background: var(--bg2); border: 1px solid var(--border2);
-      border-radius: 10px; color: var(--text); font-size: 0.95rem; font-family: inherit; outline: none;
-    }
-    textarea { min-height: 90px; resize: vertical; }
-    label { display: block; font-size: 0.78rem; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
-    .fg { margin-bottom: 12px; }
-    .toast {
-      position: fixed; top: calc(12px + var(--safe-t)); left: 50%; transform: translateX(-50%);
-      z-index: 999; background: var(--panel2); border: 1px solid var(--border2); border-radius: 12px;
-      padding: 12px 18px; font-size: 0.88rem; font-weight: 600; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-      max-width: 90%; animation: in 0.2s ease;
-    }
-    .toast.ok { border-color: rgba(61,214,140,0.4); }
-    .toast.err { border-color: rgba(255,107,122,0.4); }
+    .nav button.active { color: var(--accent); }
+    .nav .ico { font-size: 16px; line-height: 1; }
     .modal-bg {
-      position: fixed; inset: 0; z-index: 200; background: rgba(6,10,20,0.7);
+      position: fixed; inset: 0; z-index: 100; background: rgba(6, 10, 20, 0.72);
       display: none; align-items: flex-end; justify-content: center;
     }
     .modal-bg.open { display: flex; }
     .modal {
       width: 100%; max-width: 480px; max-height: 88vh; overflow-y: auto;
-      background: var(--bg2); border: 1px solid var(--border2); border-radius: 18px 18px 0 0;
+      background: #121a2b; border: 1px solid var(--border); border-radius: 16px 16px 0 0;
       padding: 18px 16px calc(20px + var(--safe-b));
     }
-    .modal h2 { font-size: 1.15rem; margin-bottom: 12px; }
-    .flash-card {
-      min-height: 160px; display: flex; flex-direction: column; align-items: center; justify-content: center;
-      text-align: center; padding: 24px; cursor: pointer; user-select: none;
+    .flash {
+      width: 100%; min-height: 150px; padding: 24px; margin: 12px 0;
+      background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+      text-align: center; font-family: inherit; color: var(--text); cursor: pointer;
     }
-    .flash-card .front { font-size: 1.6rem; font-weight: 750; }
-    .flash-card .back { font-size: 1.15rem; color: var(--accent2); margin-top: 10px; }
-    .flash-card .ex { font-size: 0.88rem; color: var(--muted); margin-top: 12px; font-style: italic; }
-    .chat { display: flex; flex-direction: column; gap: 10px; max-height: 50vh; overflow-y: auto; margin-bottom: 12px; }
-    .bubble {
-      max-width: 88%; padding: 10px 14px; border-radius: 14px; font-size: 0.92rem; line-height: 1.45;
-    }
-    .bubble.user { align-self: flex-end; background: rgba(79,140,255,0.25); border: 1px solid rgba(79,140,255,0.3); }
-    .bubble.bot { align-self: flex-start; background: var(--panel); border: 1px solid var(--border); }
-    .bubble.sys { align-self: center; background: transparent; color: var(--muted); font-size: 0.8rem; }
-    .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
-    .stat {
-      background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
-      padding: 12px 8px; text-align: center;
-    }
-    .stat .v { font-size: 1.25rem; font-weight: 750; color: var(--accent2); }
-    .stat .l { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
-    .step {
-      display: flex; gap: 12px; padding: 14px; border: 1px solid var(--border); border-radius: 12px;
-      margin-bottom: 10px; background: var(--panel); cursor: pointer; align-items: flex-start;
-    }
-    .step.done { opacity: 0.55; }
-    .step .num {
-      width: 28px; height: 28px; border-radius: 8px; background: rgba(79,140,255,0.2);
-      color: var(--accent2); display: flex; align-items: center; justify-content: center;
-      font-weight: 750; font-size: 0.85rem; flex-shrink: 0;
-    }
-    .step.done .num { background: rgba(61,214,140,0.2); color: var(--green); }
-    .step h3 { font-size: 0.95rem; font-weight: 700; }
-    .step p { font-size: 0.8rem; color: var(--muted); margin-top: 2px; }
-    .tip {
-      background: rgba(79,140,255,0.08); border: 1px solid rgba(79,140,255,0.2);
-      border-radius: 12px; padding: 12px 14px; font-size: 0.84rem; color: var(--muted); margin-bottom: 14px; line-height: 1.5;
-    }
-    .tip strong { color: var(--text); }
+    .flash .front { font-size: 1.6rem; font-weight: 750; }
+    .flash .back { font-size: 1.15rem; color: var(--accent); margin-top: 10px; }
+    .flash .hint { font-size: 0.75rem; color: var(--muted); margin-top: 14px; }
+    .grades { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+    .grades .btn { min-height: 44px; }
     .hidden { display: none !important; }
-    .en { font-family: Georgia, 'Times New Roman', serif; }
+    .tips { margin: 0 0 14px 18px; color: var(--muted); font-size: 0.88rem; }
+    .tips li { margin-bottom: 6px; }
+    .toast {
+      position: fixed; top: calc(12px + var(--safe-t)); left: 50%; transform: translateX(-50%);
+      z-index: 200; background: #1c2a42; border: 1px solid var(--border);
+      border-radius: 12px; padding: 12px 16px; font-size: 0.88rem; font-weight: 600;
+      max-width: 90%;
+    }
+    .toast.err { border-color: rgba(255, 107, 122, 0.45); }
+    .tip {
+      background: rgba(79, 140, 255, 0.08); border: 1px solid rgba(79, 140, 255, 0.2);
+      border-radius: 12px; padding: 12px; font-size: 0.84rem; color: var(--muted); margin-bottom: 14px;
+    }
+    label.file-btn {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 44px; padding: 10px 16px; border-radius: 10px;
+      background: rgba(140, 180, 255, 0.08); border: 1px solid var(--border);
+      font-size: 0.9rem; font-weight: 650; cursor: pointer; margin-bottom: 8px;
+    }
+    label.file-btn input { display: none; }
+    .chat { max-height: 45vh; overflow-y: auto; margin-bottom: 10px; display: flex; flex-direction: column; gap: 8px; }
+    .bubble { max-width: 88%; padding: 10px 12px; border-radius: 12px; font-size: 0.9rem; }
+    .bubble.user { align-self: flex-end; background: rgba(79,140,255,0.25); }
+    .bubble.assistant { align-self: flex-start; background: var(--panel); border: 1px solid var(--border); }
+    .bubble.sys { align-self: center; color: var(--muted); font-size: 0.8rem; background: transparent; }
+    .row-input { display: flex; gap: 8px; }
+    .row-input input { flex: 1; min-height: 44px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border); background: #121a2b; color: var(--text); font-size: 0.95rem; }
+
   </style>
 </head>
 <body>
-  <div id="onboard" class="hidden" style="position:fixed;inset:0;z-index:300;background:var(--bg);overflow-y:auto;padding:calc(16px + var(--safe-t)) 16px calc(24px + var(--safe-b))">
-    <div id="onboardInner"></div>
-  </div>
+  <noscript style="padding:16px">Нужен JavaScript.</noscript>
+
   <div class="screens">
-    <!-- TODAY -->
     <div class="screen active" id="sc-today">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px">
-        <div>
-          <h1>Сегодня</h1>
-          <p class="sub" id="todaySub">Разговорный English · 30–60 мин</p>
+      <h1>Сегодня</h1>
+      <p class="sub" id="levelLabel">Уровень A1–A2 · Этап 5</p>
+      <div class="stats" style="grid-template-columns:repeat(4,1fr)">
+        <div class="stat"><div class="v" id="stStreak">0</div><div class="l">серия</div></div>
+        <div class="stat"><div class="v" id="stMins">0</div><div class="l">мин</div></div>
+        <div class="stat"><div class="v" id="stPoints">0</div><div class="l">очки</div></div>
+        <div class="stat"><div class="v" id="stWords">0</div><div class="l">слов</div></div>
+      </div>
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong>Маршрут дня</strong>
+          <span class="badge" id="pathCount">0/4</span>
         </div>
-        <span class="badge" id="cefrBadge">A2</span>
+        <div class="progress"><i id="pathProgress"></i></div>
+        <div id="pathList"></div>
       </div>
-      <div class="stat-grid">
-        <div class="stat"><div class="v" id="stStreak">0</div><div class="l">серия, дн</div></div>
-        <div class="stat"><div class="v" id="stMins">0</div><div class="l">мин сегодня</div></div>
-        <div class="stat"><div class="v" id="stWords">0</div><div class="l">слов в колоде</div></div>
+      <div class="tip">
+        <strong style="color:var(--text)">Честно:</strong> ~180 часов до уверенного B1.
+        Этап 5: понимание + аудирование (синтез) + говорение вслух. До B1 ещё практика месяцев, не «магия».
       </div>
-      <div class="card" id="pathCard"></div>
-      <div class="tip" id="methodTip">
-        <strong>Цель: хороший разговорный English.</strong> Частые слова, живые фразы, диалог каждый день. Travel — бонусом в колоде. Грамматика — точечно, в контексте.
-      </div>
+      <button type="button" class="btn primary block" id="btnToPractice">Перейти к практике</button>
     </div>
 
-    <!-- WORDS (SRS) -->
     <div class="screen" id="sc-words">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-        <div>
-          <h1>Слова</h1>
-          <p class="sub">Интервальные повторения (SRS)</p>
-        </div>
-        <button class="btn btn-primary btn-sm" onclick="startReview()">Повторить</button>
-      </div>
-      <div class="card" id="srsStats"></div>
+      <h1>Слова</h1>
+      <p class="sub" id="wordsMeta">2000 в колоде</p>
+      <button type="button" class="btn primary block" onclick="startReview()">Повторить due</button>
       <div id="wordList"></div>
-      <button class="btn btn-secondary btn-block" style="margin-top:8px" onclick="addWordsForLevel()">+ Слова моего уровня</button>
     </div>
 
-    <!-- PRACTICE -->
     <div class="screen" id="sc-practice">
-      <h1 style="margin-bottom:4px">Практика</h1>
-      <p class="sub" style="margin-bottom:14px">Живой разговор: о себе, мнения, планы, быт (+ travel)</p>
-      <div class="card">
-        <h3 style="font-size:0.95rem;margin-bottom:8px">Письмо (5–10 мин)</h3>
-        <p style="font-size:0.84rem;color:var(--muted);margin-bottom:12px">Напиши 4–6 предложений по теме. ИИ поправит и объяснит.</p>
-        <button class="btn btn-primary btn-block" onclick="startWriting()">Написать текст</button>
-      </div>
-      <div class="card">
-        <h3 style="font-size:0.95rem;margin-bottom:8px">Диалог с тьютором</h3>
-        <p style="font-size:0.84rem;color:var(--muted);margin-bottom:12px">Ролевые диалоги на твоём уровне. Отвечай на English.</p>
-        <button class="btn btn-primary btn-block" onclick="startDialogue()">Начать диалог</button>
-      </div>
-      <div class="card">
-        <h3 style="font-size:0.95rem;margin-bottom:8px">Шаблоны фраз</h3>
-        <p style="font-size:0.84rem;color:var(--muted);margin-bottom:12px">Готовые реплики сразу в речь — быстрее, чем слова по одному.</p>
-        <button class="btn btn-secondary btn-block" onclick="showPatterns()">Открыть шаблоны</button>
-      </div>
-      <div class="card">
-        <h3 style="font-size:0.95rem;margin-bottom:8px">Мини-грамматика</h3>
-        <p style="font-size:0.84rem;color:var(--muted);margin-bottom:12px">Одно правило + примеры + упражнение. Без воды.</p>
-        <button class="btn btn-secondary btn-block" onclick="showGrammar()">Урок грамматики</button>
-      </div>
+      <h1>Практика</h1>
+      <p class="sub">SRS, фразы, 12 уроков</p>
+      <div id="practiceBox"></div>
     </div>
 
-    <!-- TUTOR -->
     <div class="screen" id="sc-tutor">
-      <h1 style="margin-bottom:4px">Тьютор</h1>
-      <p class="sub" style="margin-bottom:12px">Свободный чат на English · правки и объяснения</p>
-      <div class="chat" id="chatBox"></div>
-      <div class="row" style="margin-bottom:8px">
-        <button class="btn btn-secondary btn-sm" onclick="tutorPrompt('Correct my last message and explain mistakes simply.')">Править</button>
-        <button class="btn btn-secondary btn-sm" onclick="tutorPrompt('Give me 5 useful phrases for this topic at my level.')">Фразы</button>
-        <button class="btn btn-secondary btn-sm" onclick="clearChat()">Очистить</button>
-      </div>
-      <div class="row">
-        <input type="text" id="chatInput" placeholder="Type in English…" style="flex:1"
-          onkeydown="if(event.key==='Enter')sendChat()">
-        <button class="btn btn-primary" onclick="sendChat()">→</button>
-      </div>
-      <p id="aiHint" style="font-size:0.75rem;color:var(--dim);margin-top:10px"></p>
+      <h1>Тьютор</h1>
+      <p class="sub">ИИ — в Этапе 3</p>
+      <div id="tutorBox"></div>
     </div>
 
-    <!-- MORE -->
-    <div class="screen" id="sc-more">
-      <h1 style="margin-bottom:14px">Ещё</h1>
+    <div class="screen" id="sc-settings">
+      <h1>Настройки</h1>
+      <p class="sub">Прогресс хранится на устройстве</p>
       <div class="card">
-        <h3 style="font-size:0.95rem;margin-bottom:10px">Профиль</h3>
-        <div class="fg"><label>Имя</label><input id="setName" maxlength="40"></div>
-        <div class="fg">
-          <label>Уровень CEFR</label>
-          <select id="setCefr">
-            <option value="A1">A1 — Beginner</option>
-            <option value="A2">A2 — Elementary</option>
-            <option value="B1">B1 — Intermediate</option>
-            <option value="B2">B2 — Upper-Intermediate</option>
-            <option value="C1">C1 — Advanced</option>
-          </select>
-        </div>
-        <div class="fg">
-          <label>Минут в день</label>
-          <select id="setMins">
-            <option value="20">20 мин (минимум)</option>
-            <option value="30">30 мин</option>
-            <option value="45">45 мин</option>
-            <option value="60">60 мин</option>
-          </select>
-        </div>
-        <div class="fg"><label>Цель</label><input id="setGoal" placeholder="Travel / work / exam…"></div>
-        <button class="btn btn-primary btn-block" onclick="saveProfile()">Сохранить</button>
+        <strong style="display:block;margin-bottom:8px">ИИ-тьютор</strong>
+        <p class="muted" style="margin-bottom:10px" id="aiStatus">Нет ключа</p>
+        <p class="muted" style="margin-bottom:10px;font-size:0.8rem">Ключ хранится в localStorage этого устройства. Не используйте рабочий ключ. С Safari API может блокировать CORS — тогда нужен свой proxy (Base URL).</p>
+        <label class="muted" style="display:block;margin-bottom:4px;font-size:0.78rem">Провайдер</label>
+        <select id="aiProvider" style="width:100%;min-height:44px;margin-bottom:10px;padding:10px;border-radius:10px;background:#121a2b;color:var(--text);border:1px solid var(--border);font-size:0.95rem">
+          <option value="groq">Groq</option>
+          <option value="openai">OpenAI</option>
+          <option value="custom">Другой (compatible)</option>
+        </select>
+        <label class="muted" style="display:block;margin-bottom:4px;font-size:0.78rem">API-ключ</label>
+        <input type="password" id="aiKey" placeholder="gsk_… / sk-…" style="width:100%;min-height:44px;margin-bottom:10px;padding:10px 12px;border-radius:10px;background:#121a2b;color:var(--text);border:1px solid var(--border);font-size:0.95rem">
+        <label class="muted" style="display:block;margin-bottom:4px;font-size:0.78rem">Base URL (для «Другой» или proxy)</label>
+        <input type="text" id="aiBase" placeholder="https://…/v1" style="width:100%;min-height:44px;margin-bottom:10px;padding:10px 12px;border-radius:10px;background:#121a2b;color:var(--text);border:1px solid var(--border);font-size:0.95rem">
+        <button type="button" class="btn primary block" id="btnSaveAi">Сохранить ИИ</button>
       </div>
       <div class="card">
-        <h3 style="font-size:0.95rem;margin-bottom:8px">ИИ (Groq)</h3>
-        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:10px">Для диалога и правок. Подключён автоматически через proxy (как в LIFE RPG). Поля — только если нужно переопределить.</p>
-        <p id="aiStatus" style="font-size:0.8rem;color:var(--dim);margin-bottom:10px"></p>
-        <div class="fg"><label>Proxy URL (рекомендуется)</label>
-          <input id="setProxy" placeholder="https://….supabase.co/functions/v1/…"></div>
-        <div class="fg"><label>Anon key</label><input id="setAnon" placeholder="eyJ… / sb_publishable_…"></div>
-        <div class="fg"><label>Или ключ Groq</label><input type="password" id="setKey" placeholder="gsk_…"></div>
-        <button class="btn btn-primary btn-block" onclick="saveAi()" style="margin-bottom:8px">Сохранить ИИ</button>
-        <button class="btn btn-secondary btn-block" onclick="testAi()">Проверить</button>
+        <p class="muted" style="margin-bottom:12px">Прогресс: <code>english_course_v1</code></p>
+        <button type="button" class="btn primary block" id="btnExport">Экспорт JSON</button>
+        <label class="file-btn">Импорт JSON<input type="file" id="btnImport" accept="application/json,.json"></label>
+        <button type="button" class="btn danger block" id="btnReset">Сбросить прогресс</button>
       </div>
-      <div class="card">
-        <h3 style="font-size:0.95rem;margin-bottom:8px">Метод</h3>
-        <p style="font-size:0.84rem;color:var(--muted);line-height:1.55">
-          Разговорный уровень (ориентир при 30–45 мин/день):<br>
-          <strong style="color:var(--text)">A1→A2</strong> ~ 2–4 мес · <strong style="color:var(--text)">A2→B1</strong> ~ 3–6 мес ·
-          <strong style="color:var(--text)">B1→B2</strong> ~ 4–8 мес.<br>
-          B1 — уже нормальный разговор в быту и в поездках. Секрет: <em>частое + говорить каждый день</em>.
-        </p>
-      </div>
-      <button class="btn btn-secondary btn-block" style="margin-bottom:8px" onclick="retakePlacement()">Пройти тест уровня заново</button>
-      <button class="btn btn-danger btn-block" onclick="resetAll()">Сбросить прогресс</button>
+      <div class="tip">Аудирование использует встроенный синтез речи iOS (без сети). ИИ — только с твоим ключом.</div>
     </div>
   </div>
 
   <nav class="nav">
-    <button class="active" data-s="today" onclick="go('today')"><span class="ico">◎</span>Сегодня</button>
-    <button data-s="words" onclick="go('words')"><span class="ico">あ</span>Слова</button>
-    <button data-s="practice" onclick="go('practice')"><span class="ico">✎</span>Практика</button>
-    <button data-s="tutor" onclick="go('tutor')"><span class="ico">◎</span>Тьютор</button>
-    <button data-s="more" onclick="go('more')"><span class="ico">···</span>Ещё</button>
+    <button type="button" class="active" data-tab="today"><span class="ico">◎</span>Сегодня</button>
+    <button type="button" data-tab="words"><span class="ico">あ</span>Слова</button>
+    <button type="button" data-tab="practice"><span class="ico">✎</span>Практика</button>
+    <button type="button" data-tab="tutor"><span class="ico">◇</span>Тьютор</button>
+    <button type="button" data-tab="settings"><span class="ico">···</span>Ещё</button>
   </nav>
 
-  <div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
+  <div class="modal-bg" id="modalBg">
     <div class="modal" id="modal"></div>
   </div>
 
-<script>
-/* ========== ENCORE — efficient English learning ========== */
-const STORE = 'encore_v1';
-const SECRET = 'encore_key';
-const LS_PROXY = 'encore_proxy';
-const LS_ANON = 'encore_anon';
-
-// Optional baked proxy (same pattern as LIFE RPG)
-const DEFAULT_PROXY_URL = 'https://sghoucsrxbywiafpxxyw.supabase.co/functions/v1/Qroq-proxy';
-const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_vUKnyvXGOcqUdq4tBv03FA_RWkH30qP';
-const GROQ_BASE = 'https://api.groq.com/openai/v1';
-
-const CEFR_ORDER = ['A1','A2','B1','B2','C1'];
-
-
-/* Travel-first vocabulary (conversation for trips) */
-const TRAVEL_SEED = {
-  A1: [
-    ['passport','паспорт','My passport is in my bag.'],
-    ['ticket','билет','I have a ticket.'],
-    ['hotel','отель','Where is the hotel?'],
-    ['airport','аэропорт','The airport is far.'],
-    ['taxi','такси','I need a taxi.'],
-    ['bus','автобус','Which bus goes there?'],
-    ['train','поезд','The train leaves at 5.'],
-    ['map','карта','Can I see a map?'],
-    ['water','вода','A bottle of water, please.'],
-    ['food','еда','Where can I buy food?'],
-    ['help','помощь','I need help.'],
-    ['please','пожалуйста','Two tickets, please.'],
-    ['thank you','спасибо','Thank you very much.'],
-    ['sorry','извините','Sorry, I don\'t understand.'],
-    ['yes','да','Yes, please.'],
-    ['no','нет','No, thank you.'],
-    ['left','налево','Turn left.'],
-    ['right','направо','Turn right.'],
-    ['straight','прямо','Go straight.'],
-    ['near','рядом','Is it near?'],
-    ['far','далеко','How far is it?'],
-    ['open','открыто','Is it open?'],
-    ['closed','закрыто','It is closed.'],
-    ['today','сегодня','Today I travel.'],
-    ['tomorrow','завтра','Tomorrow I leave.'],
-    ['now','сейчас','I need it now.'],
-    ['here','здесь','I am here.'],
-    ['there','там','Go there.'],
-    ['how much','сколько стоит','How much is it?'],
-    ['where','где','Where is the station?']
-  ],
-  A2: [
-    ['reservation','бронь','I have a reservation.'],
-    ['check-in','регистрация','Where is check-in?'],
-    ['luggage','багаж','My luggage is heavy.'],
-    ['gate','выход на посадку','Which gate?'],
-    ['delay','задержка','The flight is delayed.'],
-    ['platform','платформа','Platform 3.'],
-    ['reception','ресепшен','Go to reception.'],
-    ['key card','ключ-карта','Here is your key card.'],
-    ['wifi','вайфай','What is the wifi password?'],
-    ['bill','счёт','Can I have the bill?'],
-    ['cash','наличные','Do you take cash?'],
-    ['card','карта (оплата)','I pay by card.'],
-    ['exchange','обмен','Currency exchange'],
-    ['pharmacy','аптека','Is there a pharmacy nearby?'],
-    ['museum','музей','Tickets for the museum.'],
-    ['entrance','вход','Where is the entrance?'],
-    ['exit','выход','Emergency exit'],
-    ['recommend','рекомендовать','What do you recommend?'],
-    ['allergic','аллергия','I am allergic to nuts.'],
-    ['vegetarian','вегетарианец','A vegetarian meal, please.'],
-    ['spicy','острый','Not too spicy, please.'],
-    ['booking','бронирование','I made a booking online.'],
-    ['cancel','отменить','I need to cancel.'],
-    ['refund','возврат','Can I get a refund?'],
-    ['lost','потерянный','I lost my phone.'],
-    ['found','нашёл','I found this bag.'],
-    ['emergency','чрезвычайная ситуация','This is an emergency.'],
-    ['police','полиция','Call the police.'],
-    ['hospital','больница','Where is the hospital?'],
-    ['comfortable','удобный','Is the room comfortable?']
-  ],
-  B1: [
-    ['itinerary','маршрут поездки','Here is my itinerary.'],
-    ['layover','пересадка','I have a two-hour layover.'],
-    ['boarding pass','посадочный талон','Show your boarding pass.'],
-    ['customs','таможня','Go through customs.'],
-    ['declare','декларировать','Nothing to declare.'],
-    ['sightseeing','осмотр достопримечательностей','I love sightseeing.'],
-    ['local','местный','Ask a local for advice.'],
-    ['crowd','толпа','Avoid the crowd.'],
-    ['queue','очередь','There is a long queue.'],
-    ['appointment','запись','I have an appointment.'],
-    ['complaint','жалоба','I would like to make a complaint.'],
-    ['overbooked','перебронь','The flight is overbooked.'],
-    ['upgrade','апгрейд','Can I upgrade my seat?'],
-    ['connection','стыковка','I missed my connection.'],
-    ['jet lag','джетлаг','I have jet lag.'],
-    ['souvenir','сувенир','I bought a souvenir.'],
-    ['bargain','торговаться / выгодная покупка','You can bargain here.'],
-    ['scam','мошенничество','Be careful of scams.'],
-    ['insurance','страховка','Travel insurance is important.'],
-    ['embassy','посольство','Contact the embassy.']
-  ],
-  B2: [
-    ['reimburse','возмещать','Will you reimburse the cost?'],
-    ['accommodate','разместить / учесть','We can accommodate your request.'],
-    ['inconvenience','неудобство','Sorry for the inconvenience.'],
-    ['itinerary change','изменение маршрута','There was an itinerary change.'],
-    ['peak season','высокий сезон','Avoid peak season if possible.'],
-    ['off the beaten path','нетуристическое место','Try somewhere off the beaten path.'],
-    ['cultural etiquette','культурный этикет','Learn basic cultural etiquette.'],
-    ['transit visa','транзитная виза','Do I need a transit visa?'],
-    ['travel advisory','рекомендации для поездок','Check the travel advisory.'],
-    ['hospitality','гостеприимство','Thank you for your hospitality.']
-  ],
-  C1: [
-    ['logistics','логистика','The logistics were complicated.'],
-    ['contingency','запасной план','We need a contingency plan.'],
-    ['unprecedented','беспрецедентный','Unprecedented delays'],
-    ['diplomatically','дипломатично','Handle it diplomatically.']
-  ]
-};
-
-const TRAVEL_PATTERNS = {
-  A1: [
-    { en: 'Where is the …?', ru: 'Где …?', ex: 'Where is the bathroom?' },
-    { en: 'How much is …?', ru: 'Сколько стоит …?', ex: 'How much is a ticket?' },
-    { en: 'I would like … / I\'d like …', ru: 'Я бы хотел …', ex: 'I\'d like a coffee, please.' },
-    { en: 'Do you speak English?', ru: 'Вы говорите по-английски?', ex: 'Excuse me, do you speak English?' },
-    { en: 'I don\'t understand.', ru: 'Я не понимаю.', ex: 'Sorry, I don\'t understand.' },
-    { en: 'Can you help me?', ru: 'Можете помочь?', ex: 'Can you help me, please?' },
-    { en: 'I need …', ru: 'Мне нужно …', ex: 'I need a taxi.' },
-    { en: 'My name is …', ru: 'Меня зовут …', ex: 'My name is Alex.' }
-  ],
-  A2: [
-    { en: 'Could you repeat that, please?', ru: 'Повторите, пожалуйста.', ex: 'Could you repeat that slowly?' },
-    { en: 'I have a reservation under …', ru: 'Бронь на имя …', ex: 'I have a reservation under Ivanov.' },
-    { en: 'How do I get to …?', ru: 'Как пройти / доехать до …?', ex: 'How do I get to the museum?' },
-    { en: 'Is there a … nearby?', ru: 'Есть ли … рядом?', ex: 'Is there a pharmacy nearby?' },
-    { en: 'What time does it open/close?', ru: 'Во сколько открывается / закрывается?', ex: 'What time does the train leave?' },
-    { en: 'I\'m looking for …', ru: 'Я ищу …', ex: 'I\'m looking for platform 4.' },
-    { en: 'Can I pay by card?', ru: 'Можно картой?', ex: 'Can I pay by card?' },
-    { en: 'It\'s too expensive.', ru: 'Слишком дорого.', ex: 'Sorry, it\'s too expensive for me.' }
-  ],
-  B1: [
-    { en: 'I\'m allergic to …', ru: 'У меня аллергия на …', ex: 'I\'m allergic to peanuts.' },
-    { en: 'There seems to be a problem with …', ru: 'Похоже, проблема с …', ex: 'There seems to be a problem with my booking.' },
-    { en: 'Could you recommend a good …?', ru: 'Можете посоветовать хороший …?', ex: 'Could you recommend a good local restaurant?' },
-    { en: 'I missed my connection. What should I do?', ru: 'Я пропустил пересадку. Что делать?', ex: 'I missed my connection. What should I do?' },
-    { en: 'Is this seat taken?', ru: 'Это место занято?', ex: 'Excuse me, is this seat taken?' },
-    { en: 'I\'d like to change my booking.', ru: 'Хочу изменить бронь.', ex: 'I\'d like to change my booking to Friday.' }
-  ],
-  B2: [
-    { en: 'I appreciate your help, but I need to speak to a manager.', ru: 'Спасибо, но мне нужен менеджер.', ex: 'I appreciate your help, but I need to speak to a manager.' },
-    { en: 'According to my itinerary …', ru: 'Согласно моему маршруту …', ex: 'According to my itinerary, we arrive at 9.' },
-    { en: 'Is there any chance of a refund?', ru: 'Есть ли шанс на возврат?', ex: 'Is there any chance of a refund for the cancelled tour?' },
-    { en: 'I\'d prefer something a bit quieter / cheaper.', ru: 'Предпочёл бы тише / дешевле.', ex: 'I\'d prefer something a bit quieter if possible.' }
-  ],
-  C1: [
-    { en: 'Would it be possible to arrange an alternative?', ru: 'Можно ли организовать альтернативу?', ex: 'Would it be possible to arrange an alternative transfer?' },
-    { en: 'I understand the constraints; however …', ru: 'Понимаю ограничения, однако…', ex: 'I understand the constraints; however, I need a solution today.' }
-  ]
-};
-
-const TRAVEL_SCENES = {
-  A1: [
-    'Airport help desk: ask where the exit and taxis are.',
-    'Hotel reception: say your name and ask for your room.',
-    'Café: order water and a sandwich, ask the price.'
-  ],
-  A2: [
-    'You are lost. Ask a stranger how to get to the train station.',
-    'Hotel check-in: reservation name, nights, wifi password.',
-    'Restaurant: order food, say you don\'t want spicy, ask for the bill.'
-  ],
-  B1: [
-    'Flight delayed: ask about the new time and meal vouchers.',
-    'Wrong room at hotel: politely explain and ask to change.',
-    'Buy tickets: ask about price, student discount, and return trip.'
-  ],
-  B2: [
-    'Missed connection: negotiate rebooking with airline staff.',
-    'Complaint about noisy room: request move or partial refund.',
-    'Ask a local for non-tourist restaurant recommendations and directions.'
-  ],
-  C1: [
-    'Dispute a charge with calm, precise language at reception.',
-    'Explain a complex itinerary change and confirm next steps.'
-  ]
-};
-
-const TRAVEL_WRITING = {
-  A1: ['Write 4 sentences about your next trip (where, when, with whom).', 'Describe your hotel room in simple sentences.'],
-  A2: ['Write a short message to a hotel: booking dates and one question.', 'Describe how you get from the airport to the city.'],
-  B1: ['Write a polite complaint about a delayed train (5–7 sentences).', 'Email a host: thank them and ask about check-in time.'],
-  B2: ['Write a review of a hotel stay (pros, cons, recommendation).', 'Explain why travel insurance matters (short paragraph).'],
-  C1: ['Argue how to travel more sustainably without sounding preachy.']
-};
-
-
-/* High-frequency seed vocabulary by level (EN → RU + example) */
-const SEED = {
-  A1: [
-    ['I','я','I am a student.'],['you','ты / вы','How are you?'],['the','определённый артикль','The book is here.'],
-    ['be','быть','She is happy.'],['to','к / чтобы','I go to school.'],['and','и','You and I'],
-    ['a','неопределённый артикль','A cat'],['in','в','in the room'],['have','иметь','I have a pen.'],
-    ['it','это / оно','It is cold.'],['for','для / в течение','for you'],['not','не','I am not tired.'],
-    ['on','на','on the table'],['with','с','with friends'],['he','он','He works.'],
-    ['she','она','She reads.'],['do','делать','Do you like tea?'],['at','у / в','at home'],
-    ['this','это','This is my bag.'],['but','но','I want to, but I can\'t.'],
-    ['from','из / от','from Russia'],['by','у / к','by bus'],['we','мы','We live here.'],
-    ['say','говорить','They say hello.'],['go','идти / ехать','Go home.'],['can','мочь','I can swim.'],
-    ['want','хотеть','I want water.'],['like','нравиться','I like music.'],['time','время','What time is it?'],
-    ['day','день','Have a nice day.'],['good','хороший','Good morning.'],['new','новый','a new phone'],
-    ['work','работа / работать','I work at 9.'],['people','люди','Many people'],['year','год','this year'],
-    ['know','знать','I know him.'],['take','брать','Take a seat.'],['see','видеть','See you later.'],
-    ['come','приходить','Come in.'],['think','думать','I think so.']
-  ],
-  A2: [
-    ['because','потому что','I stay because it rains.'],['should','следует','You should rest.'],
-    ['could','мог / мог бы','Could you help?'],['would','бы','I would like coffee.'],
-    ['about','о / около','about the plan'],['through','через','through the park'],
-    ['still','всё ещё','I still study.'],['already','уже','I already ate.'],
-    ['enough','достаточно','enough time'],['almost','почти','almost done'],
-    ['usually','обычно','I usually wake up early.'],['often','часто','We often meet.'],
-    ['never','никогда','I never smoke.'],['always','всегда','She always smiles.'],
-    ['during','во время','during the lesson'],['while','пока / в то время как','while waiting'],
-    ['before','до','before dinner'],['after','после','after work'],['without','без','without sugar'],
-    ['between','между','between us'],['problem','проблема','No problem.'],['idea','идея','Good idea!'],
-    ['important','важный','This is important.'],['different','другой / разный','different cities'],
-    ['possible','возможный','Is it possible?'],['experience','опыт','work experience'],
-    ['change','менять / изменение','Change the plan.'],['decide','решать','I decided to go.'],
-    ['agree','соглашаться','I agree with you.'],['explain','объяснять','Can you explain?'],
-    ['remember','помнить','I remember that day.'],['forget','забывать','Don\'t forget.'],
-    ['prefer','предпочитать','I prefer tea.'],['suggest','предлагать','I suggest we wait.'],
-    ['improve','улучшать','Improve your English.'],['practice','практика / практиковать','Practice daily.'],
-    ['travel','путешествовать','I love to travel.'],['health','здоровье','Good health'],
-    ['money','деньги','Save money.'],['family','семья','My family'],['friend','друг','Best friend']
-  ],
-  B1: [
-    ['although','хотя','Although it rained, we went out.'],['however','однако','However, I disagree.'],
-    ['therefore','поэтому','Therefore we left.'],['whether','ли','I don\'t know whether he\'ll come.'],
-    ['unless','если не','Unless you hurry, we\'ll be late.'],['despite','несмотря на','despite the noise'],
-    ['according to','согласно','according to the report'],['in order to','для того чтобы','in order to learn'],
-    ['as soon as','как только','as soon as possible'],['as long as','пока / если','as long as you try'],
-    ['realize','осознавать','I realized my mistake.'],['consider','рассматривать','Consider this option.'],
-    ['achieve','достигать','Achieve your goals.'],['maintain','поддерживать','Maintain focus.'],
-    ['require','требовать','This requires practice.'],['provide','предоставлять','Provide examples.'],
-    ['affect','влиять','It affects sleep.'],['involve','включать / вовлекать','It involves risk.'],
-    ['develop','развивать','Develop a habit.'],['support','поддерживать','I support you.'],
-    ['challenge','вызов','a real challenge'],['opportunity','возможность','a great opportunity'],
-    ['environment','окружение / среда','work environment'],['relationship','отношения','a close relationship'],
-    ['responsibility','ответственность','Take responsibility.'],['confidence','уверенность','Build confidence.'],
-    ['efficient','эффективный','an efficient method'],['reliable','надёжный','a reliable source'],
-    ['available','доступный','Is it available?'],['appropriate','подходящий','appropriate language'],
-    ['significant','значительный','a significant change'],['essential','необходимый','Essential skills'],
-    ['tend to','иметь склонность','I tend to overthink.'],['end up','в итоге оказаться','We ended up staying.'],
-    ['figure out','разобраться','Figure it out.'],['point out','указывать','He pointed out the error.'],
-    ['carry on','продолжать','Carry on working.'],['give up','сдаваться','Don\'t give up.'],
-    ['look forward to','ждать с нетерпением','I look forward to meeting you.']
-  ],
-  B2: [
-    ['nevertheless','тем не менее','Nevertheless, we continued.'],
-    ['furthermore','кроме того','Furthermore, costs rose.'],
-    ['whereas','тогда как','I prefer tea, whereas she likes coffee.'],
-    ['whereby','посредством чего','a system whereby users vote'],
-    ['comprehensive','всеобъемлющий','a comprehensive guide'],
-    ['substantial','существенный','substantial progress'],
-    ['inevitable','неизбежный','Change is inevitable.'],
-    ['plausible','правдоподобный','a plausible explanation'],
-    ['ambiguous','двусмысленный','an ambiguous message'],
-    ['nuance','нюанс','Understand the nuance.'],
-    ['perspective','точка зрения','from my perspective'],
-    ['implication','следствие / намёк','serious implications'],
-    ['assumption','предположение','a false assumption'],
-    ['framework','рамки / структура','a useful framework'],
-    ['outcome','результат','a positive outcome'],
-    ['trade-off','компромисс','a difficult trade-off'],
-    ['leverage','использовать как рычаг','Leverage your skills.'],
-    ['prioritize','расставлять приоритеты','Prioritize sleep.'],
-    ['articulate','чётко выражать','Articulate your idea.'],
-    ['negotiate','вести переговоры','Negotiate the terms.']
-  ],
-  C1: [
-    ['notwithstanding','несмотря на','Notwithstanding the risks…'],
-    ['albeit','хотя и','albeit slowly'],
-    ['heretofore','до сих пор (форм.)','heretofore unknown'],
-    ['juxtapose','сопоставлять','Juxtapose the two theories.'],
-    ['ephemeral','эфемерный','ephemeral trends'],
-    ['ubiquitous','вездесущий','Smartphones are ubiquitous.'],
-    ['pragmatic','прагматичный','a pragmatic approach'],
-    ['scrutinize','тщательно изучать','Scrutinize the data.'],
-    ['mitigate','смягчать','Mitigate the risk.'],
-    ['underscore','подчёркивать','This underscores the need.']
-  ]
-};
-
-const PATTERNS = {
-  A1: [
-    { en: 'I am / I\'m …', ru: 'Я — …', ex: 'I\'m a builder. I\'m tired.' },
-    { en: 'I have …', ru: 'У меня есть …', ex: 'I have a question.' },
-    { en: 'I like / I don\'t like …', ru: 'Мне нравится / не нравится', ex: 'I like coffee.' },
-    { en: 'There is / There are …', ru: 'Есть / имеется', ex: 'There is a book on the table.' },
-    { en: 'Can you …?', ru: 'Можешь …?', ex: 'Can you help me?' },
-    { en: 'Where is …?', ru: 'Где …?', ex: 'Where is the station?' }
-  ],
-  A2: [
-    { en: 'I used to …', ru: 'Раньше я …', ex: 'I used to live in Moscow.' },
-    { en: 'I\'m going to …', ru: 'Я собираюсь …', ex: 'I\'m going to study tonight.' },
-    { en: 'Could you …, please?', ru: 'Не могли бы вы …', ex: 'Could you repeat that, please?' },
-    { en: 'What do you think about …?', ru: 'Что думаешь о …?', ex: 'What do you think about this plan?' },
-    { en: 'It depends on …', ru: 'Это зависит от …', ex: 'It depends on the weather.' },
-    { en: 'I\'d rather …', ru: 'Я бы предпочёл …', ex: 'I\'d rather stay home.' }
-  ],
-  B1: [
-    { en: 'The point is that …', ru: 'Суть в том, что …', ex: 'The point is that we need more time.' },
-    { en: 'As far as I know …', ru: 'Насколько я знаю …', ex: 'As far as I know, he left.' },
-    { en: 'I\'m not sure whether …', ru: 'Не уверен, … ли', ex: 'I\'m not sure whether this is correct.' },
-    { en: 'What I mean is …', ru: 'Я имею в виду …', ex: 'What I mean is we should wait.' },
-    { en: 'On the one hand … on the other hand …', ru: 'С одной стороны… с другой…', ex: 'On the one hand it\'s cheap; on the other, low quality.' },
-    { en: 'It turns out that …', ru: 'Оказывается, что …', ex: 'It turns out that he was right.' }
-  ],
-  B2: [
-    { en: 'Having said that, …', ru: 'При этом / тем не менее…', ex: 'It\'s difficult. Having said that, it\'s worth it.' },
-    { en: 'To put it another way, …', ru: 'Иначе говоря…', ex: 'To put it another way, we failed the test.' },
-    { en: 'I take your point, but …', ru: 'Понимаю вашу мысль, но…', ex: 'I take your point, but the data says otherwise.' },
-    { en: 'In terms of …', ru: 'С точки зрения …', ex: 'In terms of cost, this is better.' },
-    { en: 'Broadly speaking, …', ru: 'В целом…', ex: 'Broadly speaking, the plan works.' }
-  ],
-  C1: [
-    { en: 'Be that as it may, …', ru: 'Как бы то ни было…', ex: 'Be that as it may, we must decide.' },
-    { en: 'It is worth noting that …', ru: 'Стоит отметить, что…', ex: 'It is worth noting that results vary.' },
-    { en: 'To a large extent, …', ru: 'В значительной степени…', ex: 'To a large extent, success depends on habits.' }
-  ]
-};
-
-const GRAMMAR = {
-  A1: [
-    { t: 'Present Simple', body: 'Факты и привычки: I work / she works. Отрицание: don\'t / doesn\'t. Вопрос: Do/Does + subject.\n\nExamples:\n• I study every day.\n• She doesn\'t drink coffee.\n• Do you live here?' },
-    { t: 'to be (am/is/are)', body: 'I am, you/we/they are, he/she/it is.\n\n• I\'m a student.\n• They aren\'t ready.\n• Is he at home?' }
-  ],
-  A2: [
-    { t: 'Past Simple', body: 'Завершённое в прошлом. Правильные: +ed. Неправильные — таблица (go→went).\n\n• I watched a film yesterday.\n• She went to Spain.\n• Did you call him? — No, I didn\'t.' },
-    { t: 'Present Continuous', body: 'Сейчас / временная ситуация: am/is/are + V-ing.\n\n• I\'m reading now.\n• They aren\'t working today.' },
-    { t: 'going to vs will', body: 'going to — план/намерение. will — решение в момент речи / прогноз.\n\n• I\'m going to start tomorrow. (plan)\n• I\'ll help you. (decision now)' }
-  ],
-  B1: [
-    { t: 'Present Perfect', body: 'Связь прошлого с настоящим: have/has + V3. Often with ever, never, already, yet, for, since.\n\n• I have lived here for 3 years.\n• Have you ever been to London?\n• She hasn\'t finished yet.' },
-    { t: '1st Conditional', body: 'If + Present, will + V. Реальное будущее.\n\n• If it rains, we\'ll stay home.\n• If you practice, you\'ll improve.' },
-    { t: 'Modal verbs (should/must/might)', body: 'should — совет. must — обязанность/уверенность. might — возможность.\n\n• You should sleep more.\n• You must wear a helmet.\n• It might rain.' }
-  ],
-  B2: [
-    { t: 'Passive Voice', body: 'Object + be + V3. Фокус на действии, не на деятеле.\n\n• The house was built in 1990.\n• English is spoken here.\n• The report will be finished tomorrow.' },
-    { t: 'Relative clauses', body: 'who (people), which (things), that (both), where (places).\n\n• The man who called is my boss.\n• A book that changed my life.' },
-    { t: '2nd Conditional', body: 'If + Past, would + V. Гипотеза.\n\n• If I had more time, I would travel.\n• If I were you, I\'d start today.' }
-  ],
-  C1: [
-    { t: 'Inversion for emphasis', body: 'Rarely / Never / Not only + auxiliary + subject.\n\n• Rarely have I seen such progress.\n• Not only did he pass, but he also got top marks.' },
-    { t: 'Cleft sentences', body: 'It is/was … that/who — выделение.\n\n• It was the daily practice that helped most.\n• What I need is feedback.' }
-  ]
-};
-
-const WRITING_PROMPTS = {
-  A1: ['Describe your typical day in 5 sentences.', 'Write about your family or friends.', 'What do you like and dislike?'],
-  A2: ['Describe your last weekend.', 'Write about a place you want to visit and why.', 'What is your job or studies like?'],
-  B1: ['Describe a challenge you overcame.', 'Should people learn languages? Give 2 reasons.', 'Your plans for the next year.'],
-  B2: ['Discuss pros and cons of remote work.', 'Describe a book or film that influenced you.', 'How technology changes learning.'],
-  C1: ['Argue for or against standardized testing.', 'Reflect on a decision that shaped your path.', 'How culture affects communication style.']
-};
-
-const DIALOGUE_SCENES = {
-  A1: ['You meet a new classmate. Introduce yourself and ask 3 simple questions.', 'At a café: order a drink and ask the price.'],
-  A2: ['You are lost in a city. Ask for directions and check understanding.', 'Phone a hotel: ask about room price and breakfast.'],
-  B1: ['Job small talk: talk about your studies/work and weekend plans.', 'Disagree politely with a friend about a film.'],
-  B2: ['Negotiate a deadline with a colleague.', 'Discuss a news topic and give your opinion with reasons.'],
-  C1: ['Defend a controversial opinion in a polite debate.', 'Mentor a junior: give structured career advice.']
-};
-
-/* ---------- state ---------- */
-let S = {
-  name: 'Learner',
-  cefr: 'A2',
-  minutes: 30,
-  goal: 'Conversational English',
-  streak: { n: 0, last: null },
-  today: { date: null, mins: 0, steps: {} },
-  words: [], // {id, en, ru, ex, ef, due, reps, lapses}
-  chat: [],
-  stats: { sessions: 0, reviews: 0, written: 0 }
-};
-
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
-function today() { return new Date().toISOString().slice(0, 10); }
-
-function load() {
-  try {
-    const raw = localStorage.getItem(STORE);
-    if (raw) {
-      const d = JSON.parse(raw);
-      Object.assign(S, d);
-      if (!S.today) S.today = { date: null, mins: 0, steps: {} };
-      if (!S.streak) S.streak = { n: 0, last: null };
-      if (!Array.isArray(S.words)) S.words = [];
-      if (!Array.isArray(S.chat)) S.chat = [];
-    }
-  } catch (e) {}
-  ensureToday();
-}
-
-function save() {
-  try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) {}
-}
-
-function ensureToday() {
-  const t = today();
-  if (S.today.date !== t) {
-    // streak
-    if (S.today.date) {
-      const prev = new Date(S.today.date + 'T12:00:00');
-      const now = new Date(t + 'T12:00:00');
-      const diff = Math.round((now - prev) / 86400000);
-      if (diff === 1 && S.today.mins > 0) S.streak.n = (S.streak.n || 0) + 1;
-      else if (diff > 1) S.streak.n = 0;
-    }
-    S.today = { date: t, mins: 0, steps: {} };
-    save();
-  }
-}
-
-function toast(msg, type) {
-  const el = document.createElement('div');
-  el.className = 'toast ' + (type || '');
-  el.textContent = msg;
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 2400);
-}
-
-function go(name) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('sc-' + name).classList.add('active');
-  document.querySelectorAll('.nav button').forEach(b => b.classList.toggle('active', b.dataset.s === name));
-  if (name === 'today') renderToday();
-  if (name === 'words') renderWords();
-  if (name === 'tutor') renderChat();
-  if (name === 'more') fillMore();
-}
-
-function openModal(html) {
-  document.getElementById('modal').innerHTML = html;
-  document.getElementById('modalBg').classList.add('open');
-}
-function closeModal() { document.getElementById('modalBg').classList.remove('open'); }
-
-
-/* ---------- Placement & onboard (travel) ---------- */
-const PLACE_Q = [
-  // A1
-  { q: '«Меня зовут Анна» по-английски:', options: ['I name Anna', 'My name is Anna', 'I am name Anna', 'Name my Anna'], a: 1, lvl: 'A1' },
-  { q: 'Выбери вопрос о месте:', options: ['What time is it?', 'Where is the station?', 'How old are you?', 'Who are you?'], a: 1, lvl: 'A1' },
-  { q: 'He ___ a teacher.', options: ['am', 'is', 'are', 'be'], a: 1, lvl: 'A1' },
-  // A2
-  { q: 'Yesterday I ___ home early.', options: ['go', 'goed', 'went', 'goes'], a: 2, lvl: 'A2' },
-  { q: 'I ___ coffee every morning.', options: ['drinks', 'drink', 'drinking', 'drank'], a: 1, lvl: 'A2' },
-  { q: '«Я не умею плавать»:', options: ['I not can swim', 'I can\'t swim', 'I don\'t can swim', 'I no swim'], a: 1, lvl: 'A2' },
-  { q: 'There ___ two bags on the table.', options: ['is', 'are', 'be', 'have'], a: 1, lvl: 'A2' },
-  // B1
-  { q: 'I ___ here since 2020.', options: ['live', 'lived', 'have lived', 'am living'], a: 2, lvl: 'B1' },
-  { q: 'If it rains tomorrow, we ___ at home.', options: ['stay', 'will stay', 'would stay', 'stayed'], a: 1, lvl: 'B1' },
-  { q: 'She asked me where I ___.', options: ['live', 'lived', 'am live', 'lives'], a: 1, lvl: 'B1' },
-  { q: 'Choose the natural line:', options: ['I am agree with you', 'I agree with you', 'I am agree you', 'I agreeing'], a: 1, lvl: 'B1' },
-  // B2
-  { q: 'The report ___ by the team last week.', options: ['wrote', 'was written', 'has write', 'was wrote'], a: 1, lvl: 'B2' },
-  { q: 'I wish I ___ more time now.', options: ['have', 'had', 'would have', 'am having'], a: 1, lvl: 'B2' },
-  { q: 'Best formal phrase:', options: ['Give me refund!', 'I want money', 'I\'d like to request a refund', 'Refund me ASAP bro'], a: 2, lvl: 'B2' },
-  { q: 'Despite ___ tired, she finished the work.', options: ['she was', 'being', 'to be', 'she is'], a: 1, lvl: 'B2' }
-];
-
-function needsOnboard() {
-  try { return !localStorage.getItem('encore_onboarded'); } catch (e) { return true; }
-}
-
-function showOnboard() {
-  const el = document.getElementById('onboard');
-  const inner = document.getElementById('onboardInner');
-  el.classList.remove('hidden');
-  let step = 0; // 0 intro, 1 place, 2 result
-  let answers = [];
-  let qi = 0;
-
-  const renderIntro = () => {
-    inner.innerHTML = `
-      <h1 style="margin-bottom:8px">ENCORE · Conversation</h1>
-      <p style="color:var(--muted);margin-bottom:16px;line-height:1.55">
-        Цель — <strong style="color:var(--text)">хороший разговорный английский</strong>:
-        понимать и отвечать в живой речи. Путешествия — одна из тем на будущее, не единственная.
-      </p>
-      <div class="tip">
-        <strong>Как быстрее заговорить</strong><br>
-        1) Частые слова + готовые фразы<br>
-        2) SRS каждый день (не забывать)<br>
-        3) Диалог и короткие тексты — главный рычаг<br>
-        Реализм: уверенный разговорный B1 ≈ <strong>4–8 месяцев</strong> с A1 при 30–45 мин/день.
-      </div>
-      <div class="fg"><label>Как тебя зовут?</label><input id="obName" value="${esc(S.name || '')}" placeholder="Имя"></div>
-      <div class="fg"><label>Минут в день</label>
-        <select id="obMins">
-          <option value="20">20</option>
-          <option value="30" selected>30</option>
-          <option value="45">45</option>
-          <option value="60">60</option>
-        </select>
-      </div>
-      <button class="btn btn-primary btn-block" onclick="window.__obNext()">Пройти тест →</button>
-      <button class="btn btn-secondary btn-block" style="margin-top:8px" onclick="window.__obPick()">Выбрать уровень без теста</button>
-    `;
-    window.__obSaveMeta = () => {
-      S.name = document.getElementById('obName').value.trim() || 'Learner';
-      S.minutes = parseInt(document.getElementById('obMins').value, 10) || 30;
-      S.goal = 'Conversational English';
-    };
-    window.__obNext = () => {
-      window.__obSaveMeta();
-      step = 1; qi = 0; answers = [];
-      renderQ();
-    };
-    window.__obPick = () => {
-      window.__obSaveMeta();
-      inner.innerHTML = `
-        <h1>Выбери уровень</h1>
-        <p style="color:var(--muted);margin:12px 0;line-height:1.5">Лучше чуть занизить. B1 — уже нормальный разговорный минимум.</p>
-        <div class="fg"><label>CEFR</label>
-          <select id="obCefr">
-            <option value="A1">A1 — почти с нуля</option>
-            <option value="A2" selected>A2 — простые фразы</option>
-            <option value="B1">B1 — могу говорить о жизни</option>
-            <option value="B2">B2 — уверенный разговор</option>
-          </select>
-        </div>
-        <button class="btn btn-primary btn-block" onclick="window.__obGoManual()">Начать</button>
-        <button class="btn btn-secondary btn-block" style="margin-top:8px" onclick="window.__obNext()">Всё же пройти тест</button>
-      `;
-      window.__obGoManual = () => {
-        const pick = document.getElementById('obCefr')?.value || 'A2';
-        S.cefr = pick;
-        save();
-        try { localStorage.setItem('encore_onboarded', '1'); } catch (e) {}
-        document.getElementById('onboard').classList.add('hidden');
-        addWordsForLevel();
-        renderToday();
-        toast('Уровень ' + pick, 'ok');
-      };
-    };
-  };
-
-  const renderQ = () => {
-    if (qi >= PLACE_Q.length) { finishPlace(); return; }
-    const item = PLACE_Q[qi];
-    inner.innerHTML = `
-      <p style="font-size:0.8rem;color:var(--dim);margin-bottom:8px">Вопрос ${qi + 1} / ${PLACE_Q.length}</p>
-      <h2 style="font-size:1.1rem;margin-bottom:16px">${esc(item.q)}</h2>
-      ${item.options.map((o, i) => `
-        <button class="btn btn-secondary btn-block" style="margin-bottom:8px;justify-content:flex-start;text-align:left"
-          onclick="window.__obAns(${i})">${esc(o)}</button>
-      `).join('')}
-    `;
-    window.__obAns = (i) => { answers.push(i); qi++; renderQ(); };
-  };
-
-  const finishPlace = () => {
-    let score = 0;
-    const byLvl = { A1: 0, A2: 0, B1: 0, B2: 0 };
-    const maxLvl = { A1: 0, A2: 0, B1: 0, B2: 0 };
-    PLACE_Q.forEach((item, i) => {
-      maxLvl[item.lvl] = (maxLvl[item.lvl] || 0) + 1;
-      if (answers[i] === item.a) {
-        score++;
-        byLvl[item.lvl] = (byLvl[item.lvl] || 0) + 1;
-      }
-    });
-    // Strict: need solid lower bands before higher CEFR
-    let cefr = 'A1';
-    const ok = (lvl, need) => (byLvl[lvl] || 0) >= need;
-    if (ok('A1', 2) && ok('A2', 2)) cefr = 'A2';
-    if (ok('A1', 2) && ok('A2', 3) && ok('B1', 2)) cefr = 'B1';
-    if (ok('A1', 2) && ok('A2', 3) && ok('B1', 3) && ok('B2', 3)) cefr = 'B2';
-    // Cap by total score too
-    if (score <= 4) cefr = 'A1';
-    else if (score <= 7 && cefr !== 'A1') cefr = (cefr === 'B2' ? 'B1' : cefr);
-    else if (score <= 10 && cefr === 'B2') cefr = 'B1';
-    S.cefr = cefr;
-    S.goal = 'Conversational English';
-    save();
-    const labels = {
-      A1: 'Старт: простые фразы о себе, еде, месте, просьбах.',
-      A2: 'База: быт, планы, прошлое, простые диалоги.',
-      B1: 'Разговорный уровень: мнения, истории, уточнения.',
-      B2: 'Свободнее: споры, нюансы, длинные объяснения.'
-    };
-    const honest = {
-      A1: 'Честно для старта: короткие фразы, много поддержки.',
-      A2: 'База есть; диалоги ещё простые.',
-      B1: 'Уже можно говорить о жизни; ошибки нормальны.',
-      B2: 'Только если уверенно понимаешь сложные фразы выше — иначе выбери B1.'
-    };
-    inner.innerHTML = `
-      <h1>Результат теста: ${cefr}</h1>
-      <p style="color:var(--muted);margin:12px 0;line-height:1.5">Верно ${score} из ${PLACE_Q.length}. ${labels[cefr]}</p>
-      <div class="tip">${honest[cefr]}<br><br>Тест короткий — <strong>лучше занизить</strong>, чем завысить. С завышенным уровнем ИИ и слова будут слишком сложными.</div>
-      <div class="fg"><label>Оставь или поправь уровень</label>
-        <select id="obCefr">
-          <option value="A1" ${cefr==='A1'?'selected':''}>A1 — начинающий</option>
-          <option value="A2" ${cefr==='A2'?'selected':''}>A2 — элементарный</option>
-          <option value="B1" ${cefr==='B1'?'selected':''}>B1 — средний (разговорный минимум)</option>
-          <option value="B2" ${cefr==='B2'?'selected':''}>B2 — выше среднего</option>
-        </select>
-      </div>
-      <button class="btn btn-primary btn-block" onclick="window.__obGo()">Начать с этого уровня</button>
-    `;
-    window.__obGo = () => {
-      const pick = document.getElementById('obCefr')?.value || cefr;
-      S.cefr = pick;
-      save();
-      try { localStorage.setItem('encore_onboarded', '1'); } catch (e) {}
-      document.getElementById('onboard').classList.add('hidden');
-      addWordsForLevel();
-      renderToday();
-      toast('Уровень ' + pick + ' · колода готова', 'ok');
-    };
-  };
-
-  renderIntro();
-}
-
-
-/* ---------- AI ---------- */
-function getProxy() {
-  try {
-    const baked = (DEFAULT_PROXY_URL || '').trim();
-    if (baked) return baked.replace(/\/$/, '');
-    return (localStorage.getItem(LS_PROXY) || '').trim().replace(/\/$/, '');
-  } catch (e) { return (DEFAULT_PROXY_URL || '').trim().replace(/\/$/, ''); }
-}
-function getAnon() {
-  try {
-    const baked = (DEFAULT_SUPABASE_ANON_KEY || '').trim();
-    if (baked) return baked;
-    return (localStorage.getItem(LS_ANON) || '').trim();
-  } catch (e) { return (DEFAULT_SUPABASE_ANON_KEY || '').trim(); }
-}
-function getKey() {
-  try { return localStorage.getItem(SECRET) || ''; } catch (e) { return ''; }
-}
-function hasAi() { return !!(getProxy() || getKey()); }
-
-async function callAi(system, user, maxTokens) {
-  maxTokens = maxTokens || 800;
-  const proxy = getProxy();
-  const key = getKey();
-  if (!proxy && !key) throw new Error('ИИ не настроен');
-
-  const headers = { 'Content-Type': 'application/json' };
-  let url;
-  if (proxy) {
-    url = proxy;
-    const anon = getAnon();
-    if (anon) {
-      headers['Authorization'] = 'Bearer ' + anon;
-      headers['apikey'] = anon;
-    }
-  } else {
-    url = GROQ_BASE + '/chat/completions';
-    headers['Authorization'] = 'Bearer ' + key;
-  }
-
-  const body = {
-    model: 'openai/gpt-oss-20b',
-    messages: [
-      { role: 'system', content: system },
-      { role: 'user', content: user }
-    ],
-    temperature: 0.7,
-    max_tokens: maxTokens
-  };
-
-  let res;
-  try {
-    res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
-  } catch (e) {
-    throw new Error('Сеть: ' + (e.message || 'Load failed') + '. Проверь интернет / proxy.');
-  }
-  if (!res.ok) {
-    const errText = await res.text().catch(() => '');
-    let msg = 'HTTP ' + res.status;
-    try {
-      const err = JSON.parse(errText);
-      msg = err.error?.message || err.message || err.msg || msg;
-    } catch (_) {
-      if (errText) msg = errText.slice(0, 140);
-    }
-    throw new Error(msg);
-  }
-  const data = await res.json();
-  const msg = data.choices && data.choices[0] && data.choices[0].message;
-  let text = (msg && msg.content) || data.content || '';
-  // gpt-oss sometimes puts text in reasoning with empty content
-  if (!text && msg && msg.reasoning) text = String(msg.reasoning).slice(0, 500);
-  if (!text) throw new Error('Пустой ответ ИИ — нажми ещё раз');
-  return String(text).trim();
-}
-
-function tutorSystem() {
-  return `You are a strict but friendly English tutor for a ${S.cefr} learner (goal: ${S.goal || 'general English'}).
-Rules:
-- Prefer short, clear English. Add brief Russian only when explaining a hard rule.
-- Correct mistakes gently: show corrected version + 1-line reason.
-- Push full sentences for real conversation (self, opinions, plans, stories). Include travel situations when relevant.
-- Stay at ${S.cefr} level: do not overwhelm with rare vocabulary.
-- If the user writes in Russian, answer in English and encourage English.`;
-}
-
-/* ---------- SRS (SM-2 light) ---------- */
-function dueWords() {
-  const now = Date.now();
-  return S.words.filter(w => !w.due || w.due <= now).sort((a, b) => (a.due || 0) - (b.due || 0));
-}
-
-function schedule(w, grade) {
-  // grade: 0 again, 1 hard, 2 good, 3 easy
-  w.reps = (w.reps || 0) + 1;
-  if (grade === 0) {
-    w.lapses = (w.lapses || 0) + 1;
-    w.ef = Math.max(1.3, (w.ef || 2.5) - 0.2);
-    w.due = Date.now() + 10 * 60 * 1000; // 10 min
-    w.interval = 0;
-  } else {
-    w.ef = Math.min(2.8, (w.ef || 2.5) + (grade === 3 ? 0.15 : grade === 2 ? 0.05 : -0.05));
-    if (!w.interval || w.interval < 1) w.interval = grade === 3 ? 3 : 1;
-    else w.interval = Math.round(w.interval * w.ef * (grade === 1 ? 0.8 : 1));
-    w.due = Date.now() + w.interval * 86400000;
-  }
-}
-
-function addWordsForLevel() {
-  // General conversation first, travel as useful extra
-  const general = SEED[S.cefr] || SEED.A2;
-  const travel = TRAVEL_SEED[S.cefr] || TRAVEL_SEED.A2;
-  const pack = general.concat(travel);
-  let added = 0;
-  const have = new Set(S.words.map(w => w.en.toLowerCase()));
-  pack.forEach(([en, ru, ex]) => {
-    if (have.has(en.toLowerCase())) return;
-    S.words.push({ id: uid(), en, ru, ex, ef: 2.5, due: Date.now(), reps: 0, lapses: 0, interval: 0, tag: 'travel' });
-    have.add(en.toLowerCase());
-    added++;
-  });
-  if (S.words.length < 40) {
-    const idx = CEFR_ORDER.indexOf(S.cefr);
-    if (idx > 0) {
-      const prevT = TRAVEL_SEED[CEFR_ORDER[idx - 1]] || [];
-      prevT.forEach(([en, ru, ex]) => {
-        if (have.has(en.toLowerCase())) return;
-        S.words.push({ id: uid(), en, ru, ex, ef: 2.5, due: Date.now(), reps: 0, lapses: 0, interval: 0, tag: 'travel' });
-        have.add(en.toLowerCase());
-        added++;
-      });
-    }
-  }
-  save();
-  renderWords();
-  renderToday();
-  toast(added ? ('+' + added + ' слов') : 'Все слова уровня уже в колоде', added ? 'ok' : '');
-}
-
-function startReview() {
-  const list = dueWords();
-  if (!list.length) {
-    toast('Нет карточек к повторению — добавь слова или приходи позже');
-    return;
-  }
-  let i = 0;
-  let flipped = false;
-  const show = () => {
-    if (i >= list.length) {
-      closeModal();
-      logMins(Math.max(3, Math.round(list.length * 0.4)));
-      markStep('srs');
-      S.stats.reviews = (S.stats.reviews || 0) + 1;
-      save();
-      renderWords();
-      renderToday();
-      toast('Повтор завершён', 'ok');
-      return;
-    }
-    const w = list[i];
-    flipped = false;
-    openModal(`
-      <h2>Повтор ${i + 1}/${list.length}</h2>
-      <div class="card flash-card" id="flash" onclick="window.__flipFlash()">
-        <div class="front en" id="flashFront">${esc(w.en)}</div>
-        <div class="back hidden" id="flashBack">${esc(w.ru)}</div>
-        <div class="ex hidden" id="flashEx">${esc(w.ex || '')}</div>
-        <p style="font-size:0.75rem;color:var(--dim);margin-top:16px" id="flashHint">нажми, чтобы перевернуть</p>
-      </div>
-      <div class="row" id="gradeRow" style="display:none;margin-top:12px">
-        <button class="btn btn-danger btn-sm" style="flex:1" onclick="window.__grade(0)">Снова</button>
-        <button class="btn btn-secondary btn-sm" style="flex:1" onclick="window.__grade(1)">Трудно</button>
-        <button class="btn btn-success btn-sm" style="flex:1" onclick="window.__grade(2)">Хорошо</button>
-        <button class="btn btn-primary btn-sm" style="flex:1" onclick="window.__grade(3)">Легко</button>
-      </div>
-      <button class="btn btn-secondary btn-block" style="margin-top:10px" onclick="closeModal()">Закрыть</button>
-    `);
-    window.__flipFlash = () => {
-      flipped = true;
-      document.getElementById('flashBack').classList.remove('hidden');
-      document.getElementById('flashEx').classList.remove('hidden');
-      document.getElementById('flashHint').classList.add('hidden');
-      document.getElementById('gradeRow').style.display = 'flex';
-    };
-    window.__grade = (g) => {
-      schedule(w, g);
-      save();
-      i++;
-      show();
-    };
-  };
-  show();
-}
-
-/* ---------- Daily path ---------- */
-function pathSteps() {
-  const m = S.minutes || 30;
-  // Conversational path: SRS + phrases + speaking/writing
-  const steps = [
-    { id: 'srs', title: 'Повтор слов (SRS)', mins: Math.min(12, Math.round(m * 0.3)), desc: 'Частые слова к повтору' },
-    { id: 'input', title: 'Фразы для разговора', mins: Math.round(m * 0.2), desc: 'Шаблоны: мнение, просьба, рассказ' },
-    { id: 'output', title: 'Диалог или письмо', mins: Math.round(m * 0.4), desc: 'Главное ускорение — говорить и писать' },
-    { id: 'review', title: '3 фразы на память', mins: Math.max(3, Math.round(m * 0.1)), desc: 'Скажи вслух без подсказки' }
-  ];
-  return steps;
-}
-
-function markStep(id) {
-  S.today.steps[id] = true;
-  save();
-  renderToday();
-}
-
-function logMins(n) {
-  ensureToday();
-  S.today.mins = (S.today.mins || 0) + n;
-  if (S.today.mins >= (S.minutes || 30) * 0.5) {
-    // partial day counts toward maintaining streak marker
-    S.streak.last = today();
-  }
-  save();
-  renderToday();
-}
-
-function renderToday() {
-  ensureToday();
-  document.getElementById('cefrBadge').textContent = S.cefr;
-  document.getElementById('todaySub').textContent =
-    (S.name || 'Learner') + ' · ' + (S.minutes || 30) + ' мин · ' + (S.goal || 'English');
-  document.getElementById('stStreak').textContent = S.streak.n || 0;
-  document.getElementById('stMins').textContent = S.today.mins || 0;
-  document.getElementById('stWords').textContent = S.words.length;
-
-  const steps = pathSteps();
-  const done = steps.filter(s => S.today.steps[s.id]).length;
-  const pct = Math.round((done / steps.length) * 100);
-
-  let html = `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <strong style="font-size:0.95rem">Маршрут дня</strong>
-      <span class="badge ${pct===100?'badge-green':''}">${done}/${steps.length}</span>
-    </div>
-    <div class="progress"><i style="width:${pct}%"></i></div>
-  `;
-  steps.forEach((s, idx) => {
-    const isDone = !!S.today.steps[s.id];
-    const action = s.id === 'srs' ? 'startReview()'
-      : s.id === 'input' ? 'showPatterns()'
-      : s.id === 'output' ? 'startDialogue()'
-      : 'finishReview()';
-    html += `
-      <div class="step ${isDone ? 'done' : ''}" onclick="${action}">
-        <div class="num">${isDone ? '✓' : (idx + 1)}</div>
-        <div style="flex:1;min-width:0">
-          <h3>${s.title}</h3>
-          <p>~${s.mins} мин · ${s.desc}</p>
-        </div>
-      </div>`;
-  });
-  if (!S.words.length) {
-    html += `<button class="btn btn-primary btn-block" onclick="addWordsForLevel()">Начать: загрузить слова ${S.cefr}</button>`;
-  } else if (dueWords().length) {
-    html += `<button class="btn btn-primary btn-block" onclick="startReview()">Повторить ${dueWords().length} карточек</button>`;
-  } else {
-    html += `<button class="btn btn-secondary btn-block" onclick="go('practice')">Перейти к практике</button>`;
-  }
-  document.getElementById('pathCard').innerHTML = html;
-}
-
-function finishReview() {
-  openModal(`
-    <h2>Обзор дня</h2>
-    <p style="color:var(--muted);font-size:0.9rem;margin-bottom:12px">Напиши 3 вещи на английском, которые запомнил сегодня (слова или фразы).</p>
-    <textarea id="dayReview" placeholder="1.&#10;2.&#10;3."></textarea>
-    <div class="row" style="margin-top:12px">
-      <button class="btn btn-secondary" style="flex:1" onclick="closeModal()">Позже</button>
-      <button class="btn btn-primary" style="flex:1" onclick="saveDayReview()">Готово</button>
-    </div>
-  `);
-}
-
-function saveDayReview() {
-  const t = document.getElementById('dayReview')?.value || '';
-  markStep('review');
-  logMins(3);
-  S.stats.sessions = (S.stats.sessions || 0) + 1;
-  if ((S.today.mins || 0) >= 10) {
-    const yday = today();
-    if (S.streak.last !== yday) {
-      /* streak already handled on day roll; mark activity */
-    }
-  }
-  save();
-  closeModal();
-  toast(t.trim() ? 'День зафиксирован' : 'Шаг отмечен', 'ok');
-  renderToday();
-}
-
-/* ---------- Words UI ---------- */
-function renderWords() {
-  const due = dueWords().length;
-  document.getElementById('srsStats').innerHTML = `
-    <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap">
-      <div><span class="badge">${S.words.length} в колоде</span></div>
-      <div><span class="badge badge-gold">${due} к повтору</span></div>
-      <div><span class="badge badge-green">${S.stats.reviews || 0} сессий</span></div>
-    </div>
-    <p style="font-size:0.82rem;color:var(--muted);margin-top:10px">SRS показывает карточку снова через интервал. «Снова» — скоро; «Легко» — через дни.</p>
-  `;
-  const list = S.words.slice().sort((a, b) => (a.due || 0) - (b.due || 0)).slice(0, 40);
-  document.getElementById('wordList').innerHTML = list.length ? list.map(w => {
-    const dueL = !w.due || w.due <= Date.now() ? 'сейчас' : new Date(w.due).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
-    return `<div class="card" style="padding:12px;margin-bottom:8px">
-      <div style="display:flex;justify-content:space-between;gap:8px">
-        <div><strong class="en">${esc(w.en)}</strong><div style="font-size:0.82rem;color:var(--muted)">${esc(w.ru)}</div></div>
-        <span class="badge">${dueL}</span>
-      </div>
-    </div>`;
-  }).join('') : '<p style="color:var(--muted);font-size:0.9rem">Колода пуста. Нажми «+ Слова моего уровня».</p>';
-}
-
-/* ---------- Practice ---------- */
-function showPatterns() {
-  const pack = (PATTERNS[S.cefr] || PATTERNS.A2).concat(TRAVEL_PATTERNS[S.cefr] || []).slice(0, 10);
-  openModal(`
-    <h2>Фразы · ${S.cefr}</h2>
-    <p style="font-size:0.84rem;color:var(--muted);margin-bottom:12px">Прочитай вслух. Подставь свои слова. Часть фраз — и для поездок.</p>
-    ${pack.map(p => `
-      <div class="card" style="margin-bottom:8px;padding:12px">
-        <div class="en" style="font-weight:700;font-size:1rem">${esc(p.en)}</div>
-        <div style="font-size:0.84rem;color:var(--muted);margin-top:4px">${esc(p.ru)}</div>
-        <div style="font-size:0.84rem;color:var(--accent2);margin-top:6px;font-style:italic">${esc(p.ex)}</div>
-      </div>
-    `).join('')}
-    <button class="btn btn-primary btn-block" onclick="markStep('input');logMins(8);closeModal();toast('Шаблоны отмечены','ok')">Готово · ~8 мин</button>
-  `);
-}
-
-function showGrammar() {
-  const pack = GRAMMAR[S.cefr] || GRAMMAR.A2;
-  const g = pack[Math.floor(Math.random() * pack.length)];
-  openModal(`
-    <h2>${esc(g.t)}</h2>
-    <pre style="white-space:pre-wrap;font-family:inherit;font-size:0.9rem;line-height:1.55;color:var(--text);margin:12px 0">${esc(g.body)}</pre>
-    <button class="btn btn-primary btn-block" onclick="markStep('input');logMins(10);closeModal();toast('Грамматика отмечена','ok')">Понял · ~10 мин</button>
-  `);
-}
-
-function startWriting() {
-  const prompts = (WRITING_PROMPTS[S.cefr] || WRITING_PROMPTS.A2).concat(TRAVEL_WRITING[S.cefr] || []);
-  const prompt = prompts[Math.floor(Math.random() * prompts.length)];
-  openModal(`
-    <h2>Письмо · ${S.cefr}</h2>
-    <p style="color:var(--accent2);margin-bottom:12px;font-weight:600">${esc(prompt)}</p>
-    <textarea id="writeArea" placeholder="Write in English…"></textarea>
-    <div class="row" style="margin-top:12px">
-      <button class="btn btn-secondary" style="flex:1" onclick="closeModal()">Отмена</button>
-      <button class="btn btn-primary" style="flex:1" onclick="submitWriting()">Проверить</button>
-    </div>
-  `);
-}
-
-async function submitWriting() {
-  const text = (document.getElementById('writeArea')?.value || '').trim();
-  if (!text) { toast('Напиши текст', 'err'); return; }
-  if (!hasAi()) {
-    markStep('output');
-    logMins(10);
-    S.stats.written = (S.stats.written || 0) + 1;
-    save();
-    closeModal();
-    toast('Сохранено (подключи ИИ для правок)', 'ok');
-    return;
-  }
-  openModal(`<h2>Проверка…</h2><p style="color:var(--muted)">Тьютор читает текст</p>`);
-  try {
-    const reply = await callAi(
-      tutorSystem(),
-      `Student writing task response:\n\n${text}\n\n1) Corrected version\n2) Top 3 mistakes explained simply\n3) One better phrase to learn`,
-      1000
-    );
-    markStep('output');
-    logMins(12);
-    S.stats.written = (S.stats.written || 0) + 1;
-    save();
-    openModal(`
-      <h2>Обратная связь</h2>
-      <div class="card" style="white-space:pre-wrap;font-size:0.9rem;line-height:1.5">${esc(reply)}</div>
-      <button class="btn btn-primary btn-block" onclick="closeModal();renderToday()">Готово</button>
-    `);
-  } catch (e) {
-    openModal(`<h2>Ошибка ИИ</h2><p style="color:var(--muted)">${esc(e.message)}</p>
-      <button class="btn btn-secondary btn-block" onclick="closeModal()">Закрыть</button>`);
-  }
-}
-
-async function startDialogue() {
-  const scenes = (DIALOGUE_SCENES[S.cefr] || DIALOGUE_SCENES.A2).concat(TRAVEL_SCENES[S.cefr] || []);
-  const scene = scenes[Math.floor(Math.random() * scenes.length)];
-  if (!hasAi()) {
-    toast('Нужен ИИ для диалога — настрой в Ещё', 'err');
-    go('more');
-    return;
-  }
-  S.chat = [
-    { role: 'sys', text: 'Scene: ' + scene },
-    { role: 'sys', text: '… открываю диалог' }
-  ];
-  save();
-  go('tutor');
-  renderChat();
-  try {
-    const reply = await callAi(
-      tutorSystem() + `\nRole-play ONLY. Scene: ${scene}\nYou are the other person (hotel, shop, friend…). One short natural turn in English. Do not explain the exercise.`,
-      'Start now with your first line as the other person.',
-      350
-    );
-    S.chat = S.chat.filter(m => m.text !== '… открываю диалог');
-    S.chat.push({ role: 'bot', text: reply });
-    markStep('output');
-    save();
-    renderChat();
-  } catch (e) {
-    S.chat = S.chat.filter(m => m.text !== '… открываю диалог');
-    S.chat.push({ role: 'sys', text: 'Ошибка: ' + (e.message || 'AI') });
-    save();
-    renderChat();
-    toast(e.message, 'err');
-  }
-}
-
-/* ---------- Tutor chat ---------- */
-function renderChat() {
-  const box = document.getElementById('chatBox');
-  if (!S.chat.length) {
-    box.innerHTML = `<div class="bubble sys">Напиши на английском или запусти диалог из «Практика».</div>`;
-  } else {
-    box.innerHTML = S.chat.map(m => {
-      if (m.role === 'sys') return `<div class="bubble sys">${esc(m.text)}</div>`;
-      return `<div class="bubble ${m.role === 'user' ? 'user' : 'bot'}">${esc(m.text)}</div>`;
-    }).join('');
-  }
-  box.scrollTop = box.scrollHeight;
-  document.getElementById('aiHint').textContent = hasAi()
-    ? 'ИИ подключён'
-    : 'ИИ не настроен — Ещё → Proxy или gsk_';
-}
-
-async function sendChat() {
-  const input = document.getElementById('chatInput');
-  const text = (input.value || '').trim();
-  if (!text) return;
-  if (!hasAi()) { toast('Настрой ИИ в Ещё', 'err'); return; }
-  input.value = '';
-  input.disabled = true;
-  S.chat.push({ role: 'user', text });
-  S.chat.push({ role: 'sys', text: '… думает' });
-  renderChat();
-  try {
-    const history = S.chat.filter(m => m.role === 'user' || m.role === 'bot').slice(-10)
-      .map(m => (m.role === 'user' ? 'Student: ' : 'Tutor: ') + m.text).join('\n');
-    const reply = await callAi(
-      tutorSystem(),
-      history + '\n\nReply as Tutor in English (short). If the student wrote Russian, answer in English and gently ask them to try English.',
-      700
-    );
-    S.chat = S.chat.filter(m => m.text !== '… думает');
-    S.chat.push({ role: 'bot', text: reply });
-    markStep('output');
-    logMins(2);
-    save();
-    renderChat();
-  } catch (e) {
-    S.chat = S.chat.filter(m => m.text !== '… думает');
-    S.chat.push({ role: 'sys', text: 'Ошибка: ' + (e.message || 'AI') });
-    save();
-    renderChat();
-    toast(e.message || 'Ошибка ИИ', 'err');
-  } finally {
-    input.disabled = false;
-    input.focus();
-  }
-}
-
-async function tutorPrompt(extra) {
-  if (!hasAi()) { toast('Нужен ИИ', 'err'); return; }
-  const last = [...S.chat].reverse().find(m => m.role === 'user');
-  const user = last ? last.text + '\n\n' + extra : extra;
-  try {
-    const reply = await callAi(tutorSystem(), user, 700);
-    S.chat.push({ role: 'bot', text: reply });
-    save();
-    renderChat();
-  } catch (e) { toast(e.message, 'err'); }
-}
-
-function clearChat() {
-  S.chat = [];
-  save();
-  renderChat();
-}
-
-/* ---------- More ---------- */
-function fillMore() {
-  document.getElementById('setName').value = S.name || '';
-  document.getElementById('setCefr').value = S.cefr || 'A2';
-  document.getElementById('setMins').value = String(S.minutes || 30);
-  document.getElementById('setGoal').value = S.goal || '';
-  document.getElementById('setProxy').value = getProxy();
-  document.getElementById('setAnon').value = getAnon();
-  document.getElementById('setKey').value = getKey();
-  document.getElementById('aiStatus').textContent = hasAi() ? 'Статус: ИИ готов' : 'Статус: не подключён';
-}
-
-function saveProfile() {
-  S.name = document.getElementById('setName').value.trim() || 'Learner';
-  S.cefr = document.getElementById('setCefr').value;
-  S.minutes = parseInt(document.getElementById('setMins').value, 10) || 30;
-  S.goal = document.getElementById('setGoal').value.trim();
-  save();
-  toast('Профиль сохранён', 'ok');
-  renderToday();
-}
-
-function saveAi() {
-  try {
-    const p = document.getElementById('setProxy').value.trim().replace(/\/$/, '');
-    const a = document.getElementById('setAnon').value.trim();
-    const k = document.getElementById('setKey').value.trim();
-    if (p) localStorage.setItem(LS_PROXY, p); else localStorage.removeItem(LS_PROXY);
-    if (a) localStorage.setItem(LS_ANON, a); else localStorage.removeItem(LS_ANON);
-    if (k) localStorage.setItem(SECRET, k); else localStorage.removeItem(SECRET);
-  } catch (e) {}
-  fillMore();
-  toast(hasAi() ? 'ИИ сохранён' : 'Нужен proxy или gsk_', hasAi() ? 'ok' : 'err');
-}
-
-async function testAi() {
-  saveAi();
-  if (!hasAi()) return;
-  try {
-    const r = await callAi('Reply with one word: ok', 'ping', 16);
-    toast('ИИ: ' + r.slice(0, 40), 'ok');
-  } catch (e) { toast(e.message, 'err'); }
-}
-
-function retakePlacement() {
-  try { localStorage.removeItem('encore_onboarded'); } catch (e) {}
-  showOnboard();
-}
-
-function resetAll() {
-
-  if (!confirm('Сбросить весь прогресс ENCORE?')) return;
-  localStorage.removeItem(STORE);
-  S = { name: 'Learner', cefr: 'A2', minutes: 30, goal: 'Conversational English', streak: { n: 0, last: null },
-    today: { date: today(), mins: 0, steps: {} }, words: [], chat: [], stats: { sessions: 0, reviews: 0, written: 0 } };
-  save();
-  go('today');
-  toast('Сброшено');
-}
-
-function esc(s) {
-  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-/* boot */
-load();
-if (!S.goal) S.goal = 'Conversational English';
-renderToday();
-fillMore();
-if (needsOnboard()) showOnboard();
-</script>
+  <script src="./lessons.ru.js"></script>
+  <script src="./ai.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
